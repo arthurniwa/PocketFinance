@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="PocketFinance.API/PocketFinance.API.csproj" />
   <Project Path="PocketFinance.Core/PocketFinance.Core.csproj" />
+  <Project Path="PocketFinance.Web/PocketFinance.Web.csproj" />
 </Solution>

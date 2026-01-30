@@ -67,7 +67,7 @@ namespace PocketFinance.API
                 EhReceita = ehReceita
             };
 
-            db.Transacao.Add(t);
+            db.Transacoes.Add(t);
             db.SaveChanges();
 
             Console.WriteLine("Transação adicionada com sucesso!");
@@ -79,7 +79,7 @@ namespace PocketFinance.API
             Console.Clear();
             Console.WriteLine("--EXTRATO--");
 
-            var lista = db.Transacao
+            var lista = db.Transacoes
             .OrderByDescending(t => t.Data)
             .ToList();
 
