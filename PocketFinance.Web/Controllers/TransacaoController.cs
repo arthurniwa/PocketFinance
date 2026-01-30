@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 using PocketFinance.Core;
 using System.Linq;
 
@@ -7,11 +8,32 @@ namespace PocketFinance.Web.Controllers
 {
     public class TransacaoController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Index(DateTime? mes)
         {
             using var db = new AppDbContext();
+            
+            var dataBase = mes ?? DateTime.Now;
 
-            var lista = db.Transacoes.OrderByDescending(t => t.Data).ToList();
+            var inicioMes = new DateTime(dataBase.Year, dataBase.Month, 1);
+            var fimMes = inicioMes.AddMonths(1).AddDays(-1);
+
+            var lista = db.Transacoes
+                  .Where(t => t.Data >= inicioMes && t.Data <= fimMes)
+                  .OrderByDescending(t => t.Data)
+                  .ToList();
+            
+            var entradas = lista.Where(t => t.EhReceita).Sum(t => t.Valor);
+
+            var saidas = lista.Where(t => !t.EhReceita).Sum(t => t.Valor);
+
+            var saldo = entradas - saidas;
+
+
+            ViewBag.Entradas = lista.Where(t => t.EhReceita).Sum(t => t.Valor);
+            ViewBag.Saidas = lista.Where(t => !t.EhReceita).Sum(t => t.Valor);
+            ViewBag.Saldo = ViewBag.Entradas - ViewBag.Saidas;
+
+            ViewBag.MesAtual = inicioMes;
 
             return View(lista);
         }
