@@ -1,8 +1,34 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Bem-vindo";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center py-5">
+    <h1 class="display-3 fw-bold text-success mb-3">PocketFinance 💰</h1>
+    <p class="lead text-muted mb-4">
+        O jeito simples, rápido e inteligente de controlar seu dinheiro.<br>
+        Saiba exatamente para onde vai seu salário.
+    </p>
+    
+    <div class="d-flex justify-content-center gap-3">
+        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary btn-lg px-5 shadow-sm">Criar Conta Grátis</a>
+        <a asp-controller="Transacao" asp-action="Index" class="btn btn-outline-secondary btn-lg px-5">Acessar Painel &raquo;</a>
+    </div>
+</div>
+
+<div class="row mt-5 pt-5 border-top">
+    <div class="col-md-4 text-center mb-4">
+        <div class="fs-1 mb-2">📊</div>
+        <h3>Dashboard Visual</h3>
+        <p class="text-muted">Veja seus gastos e receitas em cards coloridos e fáceis de entender.</p>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="fs-1 mb-2">🏷️</div>
+        <h3>Categorias</h3>
+        <p class="text-muted">Organize tudo por Alimentação, Transporte, Lazer e saiba onde economizar.</p>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="fs-1 mb-2">🔒</div>
+        <h3>Seguro e Privado</h3>
+        <p class="text-muted">Seus dados ficam salvos e protegidos. Apenas você tem acesso.</p>
+    </div>
 </div>

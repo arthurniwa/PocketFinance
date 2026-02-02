@@ -8,7 +8,7 @@ namespace PocketFinance.Web.Controllers
 {
     public class TransacaoController : Controller
     {
-        public IActionResult Index(DateTime? mes)
+        public IActionResult Index(DateTime? mes, string busca)
         {
             using var db = new AppDbContext();
             
@@ -17,11 +17,21 @@ namespace PocketFinance.Web.Controllers
             var inicioMes = new DateTime(dataBase.Year, dataBase.Month, 1);
             var fimMes = inicioMes.AddMonths(1).AddDays(-1);
 
-            var lista = db.Transacoes
-                  .Where(t => t.Data >= inicioMes && t.Data <= fimMes)
-                  .OrderByDescending(t => t.Data)
-                  .ToList();
-            
+            var query = db.Transacoes.AsQueryable();
+
+            query = query.Where(t => t.Data >= inicioMes && t.Data <= fimMes);
+
+            if (!string.IsNullOrEmpty(busca))
+            {
+                
+                query = query.Where(t => t.Descricao.Contains(busca) || 
+                                        t.Categoria.Contains(busca));
+                
+                ViewBag.BuscaAtual = busca;
+            }
+
+            var lista = query.OrderByDescending(t => t.Data).ToList();
+
             var entradas = lista.Where(t => t.EhReceita).Sum(t => t.Valor);
 
             var saidas = lista.Where(t => !t.EhReceita).Sum(t => t.Valor);
@@ -29,10 +39,9 @@ namespace PocketFinance.Web.Controllers
             var saldo = entradas - saidas;
 
 
-            ViewBag.Entradas = lista.Where(t => t.EhReceita).Sum(t => t.Valor);
-            ViewBag.Saidas = lista.Where(t => !t.EhReceita).Sum(t => t.Valor);
-            ViewBag.Saldo = ViewBag.Entradas - ViewBag.Saidas;
-
+            ViewBag.Entradas = entradas;
+            ViewBag.Saidas = saidas;
+            ViewBag.Saldo = saldo;
             ViewBag.MesAtual = inicioMes;
 
             return View(lista);
