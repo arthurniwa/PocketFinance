@@ -8,9 +8,11 @@ namespace PocketFinance.Core
     {
         public DbSet<Transacao> Transacoes { get; set; } = null!;
 
+        public DbSet<Meta> Metas { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlite("Data Source=../financas.db");
+            options.UseSqlite("Data Source=../PocketFinance.Web/financas.db");
         }
     }
 }

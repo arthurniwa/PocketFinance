@@ -1,7 +1,7 @@
 @model List<PocketFinance.Core.Transacao>
 
 <div class="container mt-4">
-    
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>💰 Minhas Finanças</h2>
         <a asp-action="Criar" class="btn btn-success btn-lg shadow">+ Nova Transação</a>
@@ -11,54 +11,68 @@
         <div class="col-md-4">
             <div class="card text-white bg-success mb-3 shadow">
                 <div class="card-header">Entradas</div>
-                <div class="card-body">
-                    <h3 class="card-title">@ViewBag.Entradas.ToString("C")</h3>
-                </div>
+                <div class="card-body"><h3 class="card-title">@ViewBag.Entradas.ToString("C")</h3></div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="card text-white bg-danger mb-3 shadow">
                 <div class="card-header">Saídas</div>
+                <div class="card-body"><h3 class="card-title">@ViewBag.Saidas.ToString("C")</h3></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3 shadow">
+                <div class="card-header">Saldo</div>
+                <div class="card-body"><h3 class="card-title">@ViewBag.Saldo.ToString("C")</h3></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow h-100">
+                <div class="card-header fw-bold">📊 Visão Geral</div>
                 <div class="card-body">
-                    <h3 class="card-title">@ViewBag.Saidas.ToString("C")</h3>
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="meuGrafico"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card text-white bg-primary mb-3 shadow">
-                <div class="card-header">Saldo</div>
-                <div class="card-body">
-                    <h3 class="card-title">@ViewBag.Saldo.ToString("C")</h3>
+        <div class="col-md-6 mb-3">
+            <div class="card shadow h-100">
+                <div class="card-header fw-bold">💡 Análise</div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                    @if (ViewBag.Saldo > 0)
+                    {
+                        <div><h1 class="display-4">🤩</h1><h4 class="text-success">No Azul!</h4><p>Continue assim.</p></div>
+                    }
+                    else if (ViewBag.Saldo < 0)
+                    {
+                        <div><h1 class="display-4">💸</h1><h4 class="text-danger">Atenção!</h4><p>Gastos superaram a renda.</p></div>
+                    }
+                    else
+                    {
+                        <div><h1 class="display-4">📝</h1><p>Cadastre dados para ver a análise.</p></div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded shadow-sm">
-        <a asp-action="Index" asp-route-mes="@ViewBag.MesAtual.AddMonths(-1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">
-            &laquo; Anterior
-        </a>
-
-        <h3 class="m-0 text-capitalize">
-            @ViewBag.MesAtual.ToString("MMMM yyyy")
-        </h3>
-
-        <a asp-action="Index" asp-route-mes="@ViewBag.MesAtual.AddMonths(1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">
-            Próximo &raquo;
-        </a>
+        <a asp-action="Index" asp-route-mes="@ViewBag.MesAtual.AddMonths(-1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">&laquo; Anterior</a>
+        <h3 class="m-0 text-capitalize">@ViewBag.MesAtual.ToString("MMMM yyyy")</h3>
+        <a asp-action="Index" asp-route-mes="@ViewBag.MesAtual.AddMonths(1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">Próximo &raquo;</a>
     </div>
 
     <form asp-action="Index" method="get" class="mb-3">
         <div class="input-group">
             <input type="hidden" name="mes" value="@ViewBag.MesAtual.ToString("yyyy-MM-dd")" />
-            <input type="text" name="busca" class="form-control" placeholder="🔍 Buscar por categoria ou descrição..." value="@ViewBag.BuscaAtual">
+            <input type="text" name="busca" class="form-control" placeholder="🔍 Buscar..." value="@ViewBag.BuscaAtual">
             <button class="btn btn-primary" type="submit">Pesquisar</button>
-            @if (!string.IsNullOrEmpty(ViewBag.BuscaAtual))
-            {
-                <a asp-action="Index" asp-route-mes="@ViewBag.MesAtual.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">Limpar</a>
-            }
+            @if (!string.IsNullOrEmpty(ViewBag.BuscaAtual)) { <a asp-action="Index" asp-route-mes="@ViewBag.MesAtual.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">Limpar</a> }
         </div>
     </form>
 
@@ -66,62 +80,37 @@
         <div class="card-body p-0">
             <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
-                    <tr>
-                        <th>Data</th>
-                        <th>Categoria</th> <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Tipo</th>
-                        <th>Ações</th>
-                    </tr>
+                    <tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
                         <tr>
                             <td>@item.Data.ToString("dd/MM/yyyy")</td>
-                            
-                            <td>
-                                <span class="badge bg-secondary">@item.Categoria</span>
-                            </td>
-
+                            <td><span class="badge bg-secondary">@item.Categoria</span></td>
                             <td>@item.Descricao</td>
-
                             <td class="fw-bold">@item.Valor.ToString("C")</td>
-
                             <td>
-                                @if(item.EhReceita)
-                                {
-                                    <span class="badge bg-success rounded-pill">Entrada</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger rounded-pill">Saída</span>
-                                }
-                            </td>
-
-                            <td>
-                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Editar">
-                                    ✏️
-                                </a>
-                                
-                                <a asp-action="Deletar" asp-route-id="@item.Id" 
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Tem certeza que quer apagar?');"
-                                   title="Excluir">
-                                    🗑️
-                                </a>
+                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">✏️</a>
+                                <a asp-action="Deletar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Apagar?')">🗑️</a>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
-            
-            @if (!Model.Any())
-            {
-                <div class="text-center p-4 text-muted">
-                    Nenhuma transação encontrada para este período.
-                </div>
-            }
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var entradas = @ViewBag.TotalEntradas.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    var saidas = @ViewBag.TotalSaidas.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+    if(entradas==0 && saidas==0) { entradas=1; saidas=0; } // Evita gráfico vazio
+    
+    new Chart(document.getElementById('meuGrafico'), {
+        type: 'doughnut',
+        data: { labels: ['Entradas', 'Saídas'], datasets: [{ data: [entradas, saidas], backgroundColor: ['#198754', '#dc3545'] }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+</script>

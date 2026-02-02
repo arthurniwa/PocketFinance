@@ -1,0 +1,48 @@
+@model List<PocketFinance.Core.Meta>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🎯 Meus Objetivos</h2>
+        <a asp-action="Criar" class="btn btn-primary shadow">+ Nova Meta</a>
+    </div>
+
+    <div class="row">
+        @foreach (var meta in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title fw-bold">@meta.Nome</h5>
+                            <span class="badge bg-light text-dark border">📅 @meta.DataLimite.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        
+                        <div class="progress mt-3" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated @(meta.PorcentagemConcluida >= 100 ? "bg-success" : "bg-primary")" 
+                                 role="progressbar" style="width: @meta.PorcentagemConcluida%">
+                                @meta.PorcentagemConcluida%
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-2 text-muted small">
+                            <span>Atual: <strong>@meta.ValorAtual.ToString("C")</strong></span>
+                            <span>Alvo: <strong>@meta.ValorAlvo.ToString("C")</strong></span>
+                        </div>
+                        <hr>
+                        
+                        <form asp-action="Depositar" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="id" value="@meta.Id" />
+                            <input type="number" name="valor" class="form-control form-control-sm" placeholder="R$ +Var" step="0.01" required>
+                            <button type="submit" class="btn btn-sm btn-outline-success">Guardar</button>
+                            <a asp-action="Deletar" asp-route-id="@meta.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Desistir?')">🗑️</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    @if (!Model.Any()) {
+        <div class="text-center mt-5"><p class="text-muted">Crie sua primeira meta!</p></div>
+    }
+</div>

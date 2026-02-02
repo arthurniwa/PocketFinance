@@ -12,5 +12,7 @@ namespace PocketFinance.Core
         public decimal Valor { get; set; }
         public DateTime Data { get; set; }
         public bool EhReceita { get; set; }
+
+        public string UsuarioId { get; set;} = string.Empty;
     }
 }

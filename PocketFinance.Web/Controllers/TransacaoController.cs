@@ -2,22 +2,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage;
 using PocketFinance.Core;
 using System.Linq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace PocketFinance.Web.Controllers
 {
+    [Authorize]
     public class TransacaoController : Controller
     {
         public IActionResult Index(DateTime? mes, string busca)
         {
             using var db = new AppDbContext();
             
+            var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var dataBase = mes ?? DateTime.Now;
 
             var inicioMes = new DateTime(dataBase.Year, dataBase.Month, 1);
             var fimMes = inicioMes.AddMonths(1).AddDays(-1);
 
             var query = db.Transacoes.AsQueryable();
+
+            query = query.Where( t=> t.UsuarioId == usuarioId);
 
             query = query.Where(t => t.Data >= inicioMes && t.Data <= fimMes);
 
@@ -43,6 +50,8 @@ namespace PocketFinance.Web.Controllers
             ViewBag.Saidas = saidas;
             ViewBag.Saldo = saldo;
             ViewBag.MesAtual = inicioMes;
+            ViewBag.TotalEntradas = entradas;
+            ViewBag.TotalSaidas = saidas;            
 
             return View(lista);
         }
@@ -58,6 +67,8 @@ namespace PocketFinance.Web.Controllers
             if (ModelState.IsValid)
             {
                 using var db = new AppDbContext();
+
+                transacao.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (transacao.Data == DateTime.MinValue)
                 {
@@ -90,6 +101,9 @@ namespace PocketFinance.Web.Controllers
             if (ModelState.IsValid)
             {
                 using var db = new AppDbContext();
+
+                transacao.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
                 db.Transacoes.Update(transacao);
                 db.SaveChanges();
 
@@ -115,46 +129,3 @@ namespace PocketFinance.Web.Controllers
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

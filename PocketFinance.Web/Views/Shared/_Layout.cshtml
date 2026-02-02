@@ -14,13 +14,20 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
     <ul class="navbar-nav flex-grow-1">
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Início</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark fw-bold" asp-controller="Transacao" asp-action="Index">Minhas Finanças</a>
-        </li>
-    </ul>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Transacao" asp-action="Index">💰 Finanças</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Meta" asp-action="Index">🎯 Metas</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </li>
+</ul>
 
     <partial name="_LoginPartial" />
 
