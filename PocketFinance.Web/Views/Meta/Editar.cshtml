@@ -1,0 +1,53 @@
+@model PocketFinance.Core.Meta
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">✏️ Editar Meta</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Editar">
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome da Meta</label>
+                    <input asp-for="Nome" class="form-control" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Valor Alvo</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input asp-for="ValorAlvo" type="text" class="form-control money" 
+                                   value="@Model.ValorAlvo.ToString("N2")" required />
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Saldo Atual</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input asp-for="ValorAtual" type="text" class="form-control money" 
+                                   value="@Model.ValorAtual.ToString("N2")" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Data Limite</label>
+                    <input asp-for="DataLimite" type="date" class="form-control" />
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning btn-lg">Salvar Alterações 💾</button>
+                    <a asp-action="Index" class="btn btn-link text-muted">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts 
+{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

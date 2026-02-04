@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using PocketFinance.Core;
-using System.Security.Claims;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace PocketFinance.Web.Controllers
 {
@@ -12,12 +12,13 @@ namespace PocketFinance.Web.Controllers
         public IActionResult Index()
         {
             using var db = new AppDbContext();
-
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var minhasMetas = db.Metas.Where( m => m.UsuarioId == meuId).ToList();
+            var metas = db.Metas
+                .Where(m => m.UsuarioId == meuId)
+                .ToList();
 
-            return View(minhasMetas);
+            return View(metas);
         }
 
         public IActionResult Criar()
@@ -29,26 +30,72 @@ namespace PocketFinance.Web.Controllers
         public IActionResult Criar(Meta meta)
         {
             using var db = new AppDbContext();
-
             meta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             db.Metas.Add(meta);
             db.SaveChanges();
-
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public IActionResult Depositar(int id, decimal valor)
+        public IActionResult Editar(int id)
         {
             using var db = new AppDbContext();
-            var meta = db.Metas.Find(id);
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+            
+            if (meta == null) return NotFound();
 
-            if(meta != null && meta.UsuarioId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+            return View(meta);
+        }
+
+        [HttpPost]
+        public IActionResult Editar(Meta meta)
+        {
+            using var db = new AppDbContext();
+            meta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            db.Metas.Update(meta);
+            db.SaveChanges();
+            
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult Deletar(int id)
+        {
+            using var db = new AppDbContext();
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+            if (meta != null)
             {
                 db.Metas.Remove(meta);
                 db.SaveChanges();
             }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult Depositar(int id, string valor)
+        {
+            using var db = new AppDbContext();
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+
+            if (meta != null && !string.IsNullOrEmpty(valor))
+            {
+                valor = valor.Replace(".", ""); 
+                valor = valor.Replace("R$", "").Trim();
+
+                if (decimal.TryParse(valor, out decimal valorDecimal))
+                {
+                    meta.ValorAtual += valorDecimal;
+                    db.Metas.Update(meta);
+                    db.SaveChanges();
+                }
+            }
+
             return RedirectToAction("Index");
         }
     }

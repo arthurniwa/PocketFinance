@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PocketFinance</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 70px; /* Espaço para a barra fixa não esconder o topo */
+        }
+        /* Aqui NÃO TEMOS a classe sidebar nem main-content */
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a href="/" class="navbar-brand mb-0 h1 fw-bold text-primary text-decoration-none">
+                💰 PocketFinance
+            </a>
+
+            <div>
+                <ul class="navbar-nav d-flex flex-row gap-3">
+                    <partial name="_LoginPartial" />
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

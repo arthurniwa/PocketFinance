@@ -32,8 +32,9 @@
                         
                         <form asp-action="Depositar" method="post" class="d-flex gap-2">
                             <input type="hidden" name="id" value="@meta.Id" />
-                            <input type="number" name="valor" class="form-control form-control-sm" placeholder="R$ +Var" step="0.01" required>
-                            <button type="submit" class="btn btn-sm btn-outline-success">Guardar</button>
+                            <input type="text" name="valor" class="form-control form-control-sm money" placeholder="R$ 0,00" required>
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Guardar">💰</button>
+                            <a asp-action="Editar" asp-route-id="@meta.Id" class="btn btn-sm btn-outline-warning" title="Editar Meta">✏️</a>
                             <a asp-action="Deletar" asp-route-id="@meta.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Desistir?')">🗑️</a>
                         </form>
                     </div>

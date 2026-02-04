@@ -3,6 +3,7 @@ using PocketFinance.Core;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("AppDbContextConnection") ?? throw new InvalidOperationException("Connection string 'AppDbContextConnection' not found.");;
 
 
 builder.Services.AddDbContext<AppDbContext>();
@@ -15,7 +16,15 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 
 var app = builder.Build();
 
+var cultureInfo = new System.Globalization.CultureInfo("pt-BR");
+cultureInfo.NumberFormat.CurrencySymbol = "R$";
 
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(cultureInfo),
+    SupportedCultures = new List<System.Globalization.CultureInfo> { cultureInfo },
+    SupportedUICultures = new List<System.Globalization.CultureInfo> { cultureInfo }
+});
 
 if (!app.Environment.IsDevelopment())
 {

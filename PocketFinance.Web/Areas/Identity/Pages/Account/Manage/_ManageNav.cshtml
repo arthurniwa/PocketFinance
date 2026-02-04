@@ -1,0 +1,26 @@
+@inject SignInManager<IdentityUser> SignInManager
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+
+<div class="list-group list-group-flush">
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("Index") ? "active fw-bold" : "")" asp-page="./Index">
+        👤 Perfil
+    </a>
+    
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("Email") ? "active fw-bold" : "")" asp-page="./Email">
+        📧 E-mail
+    </a>
+    
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("ChangePassword") ? "active fw-bold" : "")" asp-page="./ChangePassword">
+        🔒 Alterar Senha
+    </a>
+
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("TwoFactorAuthentication") ? "active fw-bold" : "")" asp-page="./TwoFactorAuthentication">
+        🛡️ Autenticação em 2 Fatores
+    </a>
+    
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("PersonalData") ? "active fw-bold" : "")" asp-page="./PersonalData">
+        💾 Seus Dados
+    </a>
+</div>

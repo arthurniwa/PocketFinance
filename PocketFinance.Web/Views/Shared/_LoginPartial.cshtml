@@ -2,27 +2,33 @@
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+    
+    var nomeExibicao = User.Claims.FirstOrDefault(c => c.Type == "NomeCompleto")?.Value ?? User.Identity?.Name;
+
     <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerenciar Conta">
-            👋 Olá, @User.Identity?.Name!
-        </a>
+        <span class="nav-link text-dark fw-bold" style="white-space: nowrap;">
+            👋 Olá, @nomeExibicao!
+        </span>
     </li>
+    
+    <li class="nav-item text-muted">|</li>
+
     <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark border-0 bg-transparent">Sair</button>
+        <form class="form-inline m-0 p-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button type="submit" class="nav-link btn btn-link text-danger fw-bold border-0 bg-transparent p-0" style="text-decoration: none;">
+                Sair
+            </button>
         </form>
     </li>
 }
 else
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Criar Conta</a>
+        <a class="nav-link text-primary fw-bold" asp-area="Identity" asp-page="/Account/Register">Criar Conta</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Entrar</a>
+        <a class="btn btn-sm btn-primary text-white ms-2 px-3" asp-area="Identity" asp-page="/Account/Login">Entrar</a>
     </li>
 }
-</ul>
