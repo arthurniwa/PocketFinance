@@ -1,0 +1,63 @@
+@model PocketFinance.Core.Transacao
+
+@{ ViewData["Title"] = "Editar Movimentação"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-warning text-dark text-center py-3 rounded-top-4">
+                <h5 class="mb-0 fw-bold">✏️ Editar Transação</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Editar">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <label class="form-label text-muted small fw-bold mb-2">TIPO</label>
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" asp-for="Tipo" value="0" id="tipoDespesa">
+                            <label class="btn btn-outline-danger w-100 py-3 fw-bold" for="tipoDespesa">Despesa</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" asp-for="Tipo" value="1" id="tipoReceita">
+                            <label class="btn btn-outline-success w-100 py-3 fw-bold" for="tipoReceita">Receita</label>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Valor" type="text" class="form-control money fs-3 fw-bold text-dark" value="@Model.Valor.ToString("N2")" />
+                        <label asp-for="Valor">R$ Valor</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Descricao" class="form-control" />
+                        <label asp-for="Descricao">Descrição</label>
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-7">
+                            <div class="form-floating">
+                                <select asp-for="Categoria" class="form-select fw-bold text-dark">
+                                    <optgroup label="Despesas"><option value="Alimentacao">🍔 Alimentação</option><option value="Transporte">🚗 Transporte</option><option value="Moradia">🏠 Moradia</option><option value="Lazer">🎉 Lazer</option><option value="Contas">💡 Contas</option></optgroup>
+                                    <optgroup label="Receitas"><option value="Salario">💵 Salário</option><option value="Extra">💰 Extra</option></optgroup>
+                                </select>
+                                <label asp-for="Categoria">Categoria</label>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-floating">
+                                <input asp-for="Data" type="date" class="form-control text-center" />
+                                <label asp-for="Data">Data</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg rounded-pill shadow fw-bold text-dark">Salvar Alterações</button>
+                        <a asp-action="Index" class="btn btn-link text-muted text-decoration-none">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
