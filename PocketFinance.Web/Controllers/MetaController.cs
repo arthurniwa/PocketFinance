@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using PocketFinance.Core;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Linq;
+using System;
 
 namespace PocketFinance.Web.Controllers
 {
@@ -13,17 +14,37 @@ namespace PocketFinance.Web.Controllers
         {
             using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            
+            // Traz as metas ordenadas pela data alvo (as mais urgentes primeiro)
             var metas = db.Metas
                 .Where(m => m.UsuarioId == meuId)
+                .OrderBy(m => m.DataAlvo)
                 .ToList();
 
             return View(metas);
         }
 
+        // --- AÇÃO RÁPIDA: DEPOSITAR ---
+        [HttpPost]
+        public IActionResult Depositar(int id, decimal valorExtra)
+        {
+            using var db = new AppDbContext();
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+            
+            if (meta != null && valorExtra > 0)
+            {
+                meta.ValorAtual += valorExtra; // Soma o valor novo
+                db.SaveChanges();
+            }
+            
+            return RedirectToAction("Index");
+        }
+
         public IActionResult Criar()
         {
-            return View();
+            return View(new Meta { DataAlvo = DateTime.Now.AddMonths(1) });
         }
 
         [HttpPost]
@@ -31,21 +52,22 @@ namespace PocketFinance.Web.Controllers
         {
             using var db = new AppDbContext();
             meta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            db.Metas.Add(meta);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            
+            if (ModelState.IsValid)
+            {
+                db.Metas.Add(meta);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(meta);
         }
 
         public IActionResult Editar(int id)
         {
             using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
             var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
-            
             if (meta == null) return NotFound();
-
             return View(meta);
         }
 
@@ -53,49 +75,29 @@ namespace PocketFinance.Web.Controllers
         public IActionResult Editar(Meta meta)
         {
             using var db = new AppDbContext();
+            // Garante que não perde o dono da meta
             meta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            db.Metas.Update(meta);
-            db.SaveChanges();
             
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                db.Metas.Update(meta);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(meta);
         }
 
         public IActionResult Deletar(int id)
         {
             using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
             var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+            
             if (meta != null)
             {
                 db.Metas.Remove(meta);
                 db.SaveChanges();
             }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult Depositar(int id, string valor)
-        {
-            using var db = new AppDbContext();
-            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
-
-            if (meta != null && !string.IsNullOrEmpty(valor))
-            {
-                valor = valor.Replace(".", ""); 
-                valor = valor.Replace("R$", "").Trim();
-
-                if (decimal.TryParse(valor, out decimal valorDecimal))
-                {
-                    meta.ValorAtual += valorDecimal;
-                    db.Metas.Update(meta);
-                    db.SaveChanges();
-                }
-            }
-
             return RedirectToAction("Index");
         }
     }

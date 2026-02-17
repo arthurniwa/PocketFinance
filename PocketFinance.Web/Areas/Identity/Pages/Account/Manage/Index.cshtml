@@ -5,26 +5,42 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h4 class="mb-4">Editar Perfil</h4>
-
-<partial name="_StatusMessage" model="Model.StatusMessage" />
-
-<form id="profile-form" method="post">
-    <div class="form-floating mb-3">
-        <input asp-for="Username" class="form-control" disabled />
-        <label asp-for="Username" class="form-label">Nome de Usuário (E-mail)</label>
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white py-3 border-0">
+        <h5 class="mb-0 fw-bold text-primary">Informações Básicas</h5>
     </div>
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-4">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                 style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
+                <i class="bi bi-person"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-0">@User.Identity?.Name</h5>
+                <small class="text-muted">Usuário do PocketFinance</small>
+            </div>
+        </div>
 
-    <div class="form-floating mb-3">
-        <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Seu telefone" />
-        <label asp-for="Input.PhoneNumber" class="form-label">Número de Celular</label>
-        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+        <partial name="_StatusMessage" model="Model.StatusMessage" />
+
+        <form id="profile-form" method="post">
+            <div class="form-floating mb-3">
+                <input asp-for="Username" class="form-control bg-light" disabled />
+                <label asp-for="Username" class="form-label"></label>
+            </div>
+            
+            <div class="form-floating mb-3">
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="(00) 00000-0000" />
+                <label asp-for="Input.PhoneNumber" class="form-label">Número de Telefone</label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <button id="update-profile-button" type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                Salvar Alterações
+            </button>
+        </form>
     </div>
-
-    <button id="update-profile-button" type="submit" class="btn btn-primary btn-lg mt-3">
-        Salvar Alterações 💾
-    </button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

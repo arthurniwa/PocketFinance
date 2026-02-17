@@ -5,29 +5,25 @@
     }
     else
     {
-        // Usa seu layout principal (com o menu superior novo)
-        Layout = "/Views/Shared/_Layout.cshtml";
+        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
     }
 }
 
 <div class="container py-5">
-    <h2 class="fw-bold mb-4">⚙️ Minha Conta</h2>
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark">⚙️ Configurações da Conta</h2>
+            <p class="text-muted">Gerencie suas informações pessoais e segurança.</p>
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-md-3 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-0">
-                    <partial name="_ManageNav" />
-                </div>
-            </div>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <partial name="_ManageNav" />
         </div>
         
         <div class="col-md-9">
-            <div class="card shadow border-0">
-                <div class="card-body p-4">
-                    @RenderBody()
-                </div>
-            </div>
+            @RenderBody()
         </div>
     </div>
 </div>

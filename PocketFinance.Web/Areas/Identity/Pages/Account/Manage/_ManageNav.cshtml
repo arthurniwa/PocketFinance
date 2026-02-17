@@ -3,24 +3,19 @@
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
 
-<div class="list-group list-group-flush">
-    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("Index") ? "active fw-bold" : "")" asp-page="./Index">
-        👤 Perfil
+<div class="list-group list-group-flush shadow-sm rounded-4 overflow-hidden">
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Account/Manage/Index" ? "active fw-bold" : "")" 
+       id="profile" asp-page="./Index">
+        <i class="bi bi-person-circle me-2"></i> Meu Perfil
     </a>
     
-    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("Email") ? "active fw-bold" : "")" asp-page="./Email">
-        📧 E-mail
-    </a>
-    
-    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("ChangePassword") ? "active fw-bold" : "")" asp-page="./ChangePassword">
-        🔒 Alterar Senha
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Account/Manage/ChangePassword" ? "active fw-bold" : "")" 
+       id="change-password" asp-page="./ChangePassword">
+        <i class="bi bi-shield-lock me-2"></i> Alterar Senha
     </a>
 
-    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("TwoFactorAuthentication") ? "active fw-bold" : "")" asp-page="./TwoFactorAuthentication">
-        🛡️ Autenticação em 2 Fatores
-    </a>
-    
-    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"].ToString().EndsWith("PersonalData") ? "active fw-bold" : "")" asp-page="./PersonalData">
-        💾 Seus Dados
+    <a class="list-group-item list-group-item-action py-3 @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Account/Manage/PersonalData" ? "active fw-bold" : "")" 
+       id="personal-data" asp-page="./PersonalData">
+        <i class="bi bi-hdd-network me-2"></i> Dados Pessoais
     </a>
 </div>

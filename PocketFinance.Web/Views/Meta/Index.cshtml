@@ -1,49 +1,137 @@
-@model List<PocketFinance.Core.Meta>
+@model IEnumerable<PocketFinance.Core.Meta>
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>🎯 Meus Objetivos</h2>
-        <a asp-action="Criar" class="btn btn-primary shadow">+ Nova Meta</a>
+@{
+    ViewData["Title"] = "Meus Objetivos";
+    var cultura = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<div class="container py-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold text-dark mb-0"> Meus Objetivos</h2>
+            <p class="text-muted">Foque no que importa e acompanhe seu progresso.</p>
+        </div>
+        <a asp-action="Criar" class="btn btn-primary btn-lg rounded-pill shadow px-4">
+            <i class="bi bi-plus-lg"></i> Nova Meta
+        </a>
     </div>
 
-    <div class="row">
-        @foreach (var meta in Model)
-        {
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="card-title fw-bold">@meta.Nome</h5>
-                            <span class="badge bg-light text-dark border">📅 @meta.DataLimite.ToString("dd/MM/yyyy")</span>
-                        </div>
-                        
-                        <div class="progress mt-3" style="height: 25px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated @(meta.PorcentagemConcluida >= 100 ? "bg-success" : "bg-primary")" 
-                                 role="progressbar" style="width: @meta.PorcentagemConcluida%">
-                                @meta.PorcentagemConcluida%
-                            </div>
-                        </div>
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                <i class="bi bi-rocket-takeoff text-secondary display-4"></i>
+            </div>
+            <h4 class="text-muted">Nenhum objetivo traçado ainda.</h4>
+            <p class="text-muted small">Que tal começar a planejar aquela viagem ou compra?</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                // CÁLCULOS VISUAIS
+                var progresso = item.ValorMeta > 0 ? (item.ValorAtual / item.ValorMeta) * 100 : 0;
+                progresso = Math.Min(progresso, 100); // Trava em 100%
+                var diasRestantes = (item.DataAlvo - DateTime.Now).Days;
+                
+                // Cores dinâmicas (Vermelho se < 30%, Amarelo < 70%, Verde > 70%)
+                var corBarra = "bg-primary";
+                if (progresso >= 100) { corBarra = "bg-success"; }
+                else if (progresso < 30) { corBarra = "bg-danger"; }
+                else if (progresso < 70) { corBarra = "bg-warning"; }
 
-                        <div class="d-flex justify-content-between mt-2 text-muted small">
-                            <span>Atual: <strong>@meta.ValorAtual.ToString("C")</strong></span>
-                            <span>Alvo: <strong>@meta.ValorAlvo.ToString("C")</strong></span>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                        <div class="card-body p-4 d-flex flex-column">
+                            
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">@item.Nome</h5>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-event"></i> Alvo: @item.DataAlvo.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                                <div class="rounded-circle bg-light p-2 text-primary">
+                                    <i class="bi bi-trophy-fill fs-5"></i>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="text-muted small">Guardado</span>
+                                <div class="d-flex align-items-baseline">
+                                    <h3 class="fw-bold text-primary mb-0 me-2">
+                                        @item.ValorAtual.ToString("C", cultura)
+                                    </h3>
+                                    <small class="text-muted">de @item.ValorMeta.ToString("C", cultura)</small>
+                                </div>
+                            </div>
+
+                            <div class="progress mb-2" style="height: 10px; border-radius: 10px;">
+                                <div class="progress-bar @corBarra progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: @progresso.ToString("0")%">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-4">
+                                <small class="fw-bold @(progresso >= 100 ? "text-success" : "text-muted")">
+                                    @progresso.ToString("0")% Concluído
+                                </small>
+                                <small class="@(diasRestantes < 0 ? "text-danger" : "text-muted")">
+                                    @(diasRestantes < 0 ? "Atrasado!" : $"{diasRestantes} dias restantes")
+                                </small>
+                            </div>
+
+                            <div class="mt-auto d-grid gap-2">
+                                <button type="button" class="btn btn-outline-primary fw-bold rounded-pill" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalDepositar-@item.Id">
+                                    <i class="bi bi-piggy-bank"></i> Guardar Dinheiro
+                                </button>
+                                
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-light flex-fill rounded-pill text-muted">Editar</a>
+                                    <a asp-action="Deletar" asp-route-id="@item.Id" class="btn btn-light flex-fill rounded-pill text-danger hover-danger" onclick="return confirm('Desistir dessa meta?')">Excluir</a>
+                                </div>
+                            </div>
+
                         </div>
-                        <hr>
-                        
-                        <form asp-action="Depositar" method="post" class="d-flex gap-2">
-                            <input type="hidden" name="id" value="@meta.Id" />
-                            <input type="text" name="valor" class="form-control form-control-sm money" placeholder="R$ 0,00" required>
-                            <button type="submit" class="btn btn-sm btn-outline-success" title="Guardar">💰</button>
-                            <a asp-action="Editar" asp-route-id="@meta.Id" class="btn btn-sm btn-outline-warning" title="Editar Meta">✏️</a>
-                            <a asp-action="Deletar" asp-route-id="@meta.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Desistir?')">🗑️</a>
-                        </form>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-    
-    @if (!Model.Any()) {
-        <div class="text-center mt-5"><p class="text-muted">Crie sua primeira meta!</p></div>
+
+                <div class="modal fade" id="modalDepositar-@item.Id" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold">Guardar em "@item.Nome" 💰</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form asp-action="Depositar" method="post">
+                                <div class="modal-body">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <label class="form-label text-muted">Quanto você quer guardar hoje?</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-0 fw-bold">R$</span>
+                                        <input type="number" name="valorExtra" class="form-control border-0 bg-light fw-bold text-primary" placeholder="0,00" step="0.01" min="0.01" required />
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Confirmar Depósito</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     }
 </div>
+
+<style>
+    .hover-lift { transition: transform 0.2s; }
+    .hover-lift:hover { transform: translateY(-5px); }
+    .hover-danger:hover { background-color: #dc3545; color: white !important; }
+</style>
