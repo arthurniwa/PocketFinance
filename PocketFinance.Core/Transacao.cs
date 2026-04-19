@@ -21,7 +21,7 @@ namespace PocketFinance.Core
         
         public DateTime Data { get; set; } = DateTime.Now;
 
-        public int Tipo {get; set; }
+        public TipoTransacao Tipo { get; set; }
 
         
 

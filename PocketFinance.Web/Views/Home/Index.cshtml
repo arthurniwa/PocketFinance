@@ -1,114 +1,182 @@
-﻿@{
-    ViewData["Title"] = "Início";
-    // Força o uso do Layout Tela Cheia (sem barra lateral)
-    Layout = "/Views/Shared/_LayoutExterno.cshtml";
-}
-
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
 
-@if (!SignInManager.IsSignedIn(User))
+@{
+    ViewData["Title"] = "Início";
+    var logado = SignInManager.IsSignedIn(User);
+    Layout = logado ? "/Views/Shared/_Layout.cshtml" : "/Views/Shared/_LayoutExterno.cshtml";
+}
+
+@if (logado)
 {
-    /* =======================================================
-       VISÃO 1: VISITANTE (A Capa de Marketing que já fizemos)
-       ======================================================= */
-    <div class="px-4 py-5 my-5 text-center text-lg-start">
-        <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
-            <div class="col-10 col-sm-8 col-lg-6">
-                <img src="~/dashboard-print.png" class="d-block mx-lg-auto img-fluid rounded-3 shadow-lg" 
-                     alt="PocketFinance" loading="lazy" 
-                     onerror="this.src='https://via.placeholder.com/700x500?text=PocketFinance'">
+    var nomeCompleto = User.Claims.FirstOrDefault(c => c.Type == "NomeCompleto")?.Value ?? User.Identity?.Name ?? "";
+    var primeiroNome = nomeCompleto.Split(' ').FirstOrDefault() ?? "Olá";
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Olá, @primeiroNome</h1>
+            <p class="page-subtitle">O que você quer fazer hoje?</p>
+        </div>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-md-6">
+            <a asp-controller="Transacao" asp-action="Index" style="text-decoration: none;">
+                <div class="pf-card nav-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle icon-up" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9375rem; color: var(--text-1);">Finanças</div>
+                            <div class="text-muted-sm">Extrato, receitas e despesas</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-arrow-right" style="color: var(--text-3); font-size: 1.1rem;"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a asp-controller="Meta" asp-action="Index" style="text-decoration: none;">
+                <div class="pf-card nav-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle icon-blue" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9375rem; color: var(--text-1);">Metas</div>
+                            <div class="text-muted-sm">Objetivos e progresso</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-arrow-right" style="color: var(--text-3); font-size: 1.1rem;"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a asp-controller="Transacao" asp-action="Criar" style="text-decoration: none;">
+                <div class="pf-card nav-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle icon-yellow" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9375rem; color: var(--text-1);">Novo lançamento</div>
+                            <div class="text-muted-sm">Registrar receita ou despesa</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-arrow-right" style="color: var(--text-3); font-size: 1.1rem;"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a asp-area="Identity" asp-page="/Account/Manage/Index" style="text-decoration: none;">
+                <div class="pf-card nav-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle" style="width: 44px; height: 44px; font-size: 1.1rem; background: #f3e8ff; color: #7c3aed;">
+                            <i class="bi bi-person-gear"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9375rem; color: var(--text-1);">Minha conta</div>
+                            <div class="text-muted-sm">Perfil, e-mail e senha</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-arrow-right" style="color: var(--text-3); font-size: 1.1rem;"></i>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <style>
+        .nav-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            cursor: pointer;
+        }
+        .nav-card:hover {
+            border-color: #9ca3af;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+    </style>
+}
+else
+{
+    <div style="max-width: 900px; width: 100%; padding: 2rem 1rem;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5">
+                <p style="font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.05em; color: #2563eb; text-transform: uppercase; margin-bottom: 1rem;">
+                    Controle financeiro pessoal
+                </p>
+                <h1 style="font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; color: var(--text-1); margin-bottom: 1rem;">
+                    Organize suas finanças com clareza
+                </h1>
+                <p style="font-size: 1rem; color: var(--text-2); line-height: 1.6; margin-bottom: 2rem;">
+                    Registre receitas e despesas, acompanhe metas e visualize para onde vai o seu dinheiro.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn-pf btn-pf-primary" style="padding: 0.625rem 1.25rem; font-size: 0.9375rem;">
+                        Criar conta grátis
+                    </a>
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn-pf btn-pf-ghost" style="padding: 0.625rem 1.25rem; font-size: 0.9375rem;">
+                        Entrar
+                    </a>
+                </div>
             </div>
-            <div class="col-lg-6">
-                <h1 class="display-5 fw-bold lh-1 mb-3 text-primary">Controle seu dinheiro de verdade. 💰</h1>
-                <p class="lead text-muted">A ferramenta simples para organizar suas finanças.</p>
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary btn-lg px-4 me-md-2">Criar Conta</a>
-                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-secondary btn-lg px-4">Entrar</a>
+            <div class="col-lg-7">
+                <div class="pf-card p-0" style="overflow: hidden;">
+                    <div style="background: var(--primary); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></div>
+                        <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
+                        <div style="width:10px;height:10px;border-radius:50%;background:#10b981;"></div>
+                    </div>
+                    <div style="padding: 1.5rem; background: #f9fafb;">
+                        <div class="row g-2 mb-3">
+                            <div class="col-4">
+                                <div class="pf-card" style="padding: 0.875rem;">
+                                    <div style="font-size: 0.75rem; color: var(--text-2); font-weight: 500;">Saldo</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; margin-top: 0.25rem;">R$ 2.340</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="pf-card" style="padding: 0.875rem;">
+                                    <div style="font-size: 0.75rem; color: #166534; font-weight: 500;">Receitas</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; margin-top: 0.25rem; color: #166534;">R$ 5.000</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="pf-card" style="padding: 0.875rem;">
+                                    <div style="font-size: 0.75rem; color: #991b1b; font-weight: 500;">Despesas</div>
+                                    <div style="font-size: 1.125rem; font-weight: 700; margin-top: 0.25rem; color: #991b1b;">R$ 2.660</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pf-card p-0">
+                            <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.8125rem; font-weight: 600;">Últimos lançamentos</div>
+                            @foreach (var item in new[] {
+                                new { Desc = "Salário", Cat = "Receita", Val = "+ R$ 5.000", Cor = "#166534" },
+                                new { Desc = "Aluguel", Cat = "Moradia", Val = "- R$ 1.500", Cor = "#991b1b" },
+                                new { Desc = "Mercado", Cat = "Alimentação", Val = "- R$ 380", Cor = "#991b1b" },
+                                new { Desc = "Streaming", Cat = "Lazer", Val = "- R$ 55", Cor = "#991b1b" }
+                            })
+                            {
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.625rem 1rem;border-bottom:1px solid var(--border);">
+                                    <div>
+                                        <div style="font-size:0.8125rem;font-weight:500;">@item.Desc</div>
+                                        <div style="font-size:0.75rem;color:var(--text-3);">@item.Cat</div>
+                                    </div>
+                                    <span style="font-size:0.875rem;font-weight:600;color:@item.Cor;">@item.Val</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-}
-else
-{
-    /* =======================================================
-       VISÃO 2: LOGADO (O MENU "LAUNCHER")
-       ======================================================= */
-    
-    // Pega o primeiro nome para saudar
-    var nomeCompleto = User.Claims.FirstOrDefault(c => c.Type == "NomeCompleto")?.Value ?? User.Identity.Name;
-    var primeiroNome = nomeCompleto.Split(' ')[0];
-
-    <div class="container py-5">
-        
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">Olá, @primeiroNome!</h1>
-            <p class="lead text-muted">O que você deseja fazer agora?</p>
-        </div>
-
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
-
-            <div class="col">
-                <a asp-controller="Transacao" asp-action="Index" class="text-decoration-none">
-                    <div class="card h-100 shadow-sm border-0 hover-card text-center py-4">
-                        <div class="card-body">
-                            <div class="display-4 text-success mb-3"><i class="bi bi-cash-coin"></i></div>
-                            <h3 class="card-title text-dark">Finanças</h3>
-                            <p class="card-text text-muted">Ver saldo, extrato e lançar gastos.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col">
-                <a asp-controller="Meta" asp-action="Index" class="text-decoration-none">
-                    <div class="card h-100 shadow-sm border-0 hover-card text-center py-4">
-                        <div class="card-body">
-                            <div class="display-4 text-warning mb-3"><i class="bi bi-bullseye"></i></div>
-                            <h3 class="card-title text-dark">Minhas Metas</h3>
-                            <p class="card-text text-muted">Acompanhar e criar novos objetivos.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col">
-                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="text-decoration-none">
-                    <div class="card h-100 shadow-sm border-0 hover-card text-center py-4">
-                        <div class="card-body">
-                            <div class="display-4 text-primary mb-3"><i class="bi bi-person-gear"></i></div>
-                            <h3 class="card-title text-dark">Minha Conta</h3>
-                            <p class="card-text text-muted">Alterar senha, e-mail e dados pessoais.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col">
-                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" id="logoutFormMenu">
-                    <div class="card h-100 shadow-sm border-0 hover-card text-center py-4" style="cursor: pointer;" onclick="document.getElementById('logoutFormMenu').submit();">
-                        <div class="card-body">
-                            <div class="display-4 text-danger mb-3"><i class="bi bi-box-arrow-right"></i></div>
-                            <h3 class="card-title text-dark">Sair</h3>
-                            <p class="card-text text-muted">Encerrar sessão com segurança.</p>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-    </div>
-
-    <style>
-        .hover-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background-color: #fff;
-        }
-        .hover-card:hover {
-            transform: translateY(-10px); /* Sobe um pouquinho */
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important; /* Sombra forte */
-        }
-    </style>
 }

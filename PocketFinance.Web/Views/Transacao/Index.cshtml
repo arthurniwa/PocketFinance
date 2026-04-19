@@ -1,138 +1,167 @@
 @model IEnumerable<PocketFinance.Core.Transacao>
+@using System.Text.Json
 @{
-    ViewData["Title"] = "Minhas Finanças";
+    ViewData["Title"] = "Finanças";
     var cultura = new System.Globalization.CultureInfo("pt-BR");
-    
-    // Serializa os dados para o JavaScript ler
-    var labelsJson = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.GraficoLabels);
-    var valoresJson = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.GraficoValores);
+    var labelsJson = JsonSerializer.Serialize(ViewBag.GraficoLabels as string[] ?? Array.Empty<string>());
+    var valoresJson = JsonSerializer.Serialize(ViewBag.GraficoValores as decimal[] ?? Array.Empty<decimal>());
+    var saldo = (decimal)ViewBag.Saldo;
+    var entradas = (decimal)ViewBag.Entradas;
+    var saidas = (decimal)ViewBag.Saidas;
 }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<div class="container py-4">
-    
-    <div class="row mb-4 g-3">
-        <div class="col-md-4"><div class="card bg-primary text-white h-100 shadow-sm border-0"><div class="card-body"><h6 class="card-title opacity-75">Saldo Atual</h6><h2 class="fw-bold">@(((decimal)ViewBag.Saldo).ToString("C", cultura))</h2></div></div></div>
-        <div class="col-md-4"><div class="card bg-white h-100 shadow-sm border-0"><div class="card-body text-success"><h6 class="card-title text-muted">Receitas</h6><h3 class="fw-bold"><i class="bi bi-arrow-up-circle"></i> @(((decimal)ViewBag.Entradas).ToString("C", cultura))</h3></div></div></div>
-        <div class="col-md-4"><div class="card bg-white h-100 shadow-sm border-0"><div class="card-body text-danger"><h6 class="card-title text-muted">Despesas</h6><h3 class="fw-bold"><i class="bi bi-arrow-down-circle"></i> @(((decimal)ViewBag.Saidas).ToString("C", cultura))</h3></div></div></div>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Finanças</h1>
+        <p class="page-subtitle">Controle de receitas e despesas</p>
     </div>
+    <a asp-action="Criar" class="btn-pf btn-pf-primary">
+        <i class="bi bi-plus"></i> Novo lançamento
+    </a>
+</div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <button class="btn btn-outline-secondary rounded-pill px-4 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#painelGraficos">
-            <i class="bi bi-pie-chart-fill me-2"></i> Ver Análise Visual
-        </button>
-
-        <a asp-action="Criar" class="btn btn-dark rounded-pill px-4 shadow-sm">
-            <i class="bi bi-plus-lg"></i> Novo Lançamento
-        </a>
-    </div>
-
-    <div class="collapse mb-5" id="painelGraficos">
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-body p-4">
-                <div class="row align-items-center">
-                    <div class="col-md-4 text-center">
-                        <h4 class="fw-bold text-muted mb-3">Para onde vai seu dinheiro?</h4>
-                        <p class="text-muted small">Visualização de despesas por categoria.</p>
-                    </div>
-                    <div class="col-md-6 offset-md-1" style="max-height: 300px; position: relative;">
-                        <canvas id="meuGrafico"></canvas>
-                    </div>
-                </div>
+<!-- Metric cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="pf-card h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="pf-card-label">Saldo atual</span>
+                <span class="pf-badge @(saldo >= 0 ? "pf-badge-neutral" : "pf-badge-down")">
+                    <i class="bi @(saldo >= 0 ? "bi-wallet2" : "bi-exclamation-circle")"></i>
+                </span>
             </div>
+            <span class="pf-card-value @(saldo >= 0 ? "" : "text-danger")">@saldo.ToString("C", cultura)</span>
+            <p class="text-muted-sm mt-2 mb-0">Resultado do período</p>
         </div>
     </div>
+    <div class="col-md-4">
+        <div class="pf-card h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="pf-card-label">Receitas</span>
+                <span class="pf-badge pf-badge-up"><i class="bi bi-arrow-up"></i></span>
+            </div>
+            <span class="pf-card-value" style="color: #166534;">@entradas.ToString("C", cultura)</span>
+            <p class="text-muted-sm mt-2 mb-0">Total de entradas</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pf-card h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="pf-card-label">Despesas</span>
+                <span class="pf-badge pf-badge-down"><i class="bi bi-arrow-down"></i></span>
+            </div>
+            <span class="pf-card-value" style="color: #991b1b;">@Math.Abs(saidas).ToString("C", cultura)</span>
+            <p class="text-muted-sm mt-2 mb-0">Total de saídas</p>
+        </div>
+    </div>
+</div>
 
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5 text-muted"><i class="bi bi-wallet2 display-1 mb-3 d-block"></i><p>Você ainda não tem lançamentos.</p></div>
-    }
-    else
-    {
-        <div class="card shadow-sm border-0 rounded-3">
-            <div class="list-group list-group-flush rounded-3">
+<div class="row g-3">
+    <!-- Transaction list -->
+    <div class="col-lg-7">
+        <div class="pf-card p-0">
+            <div class="d-flex justify-content-between align-items-center px-4 py-3" style="border-bottom: 1px solid var(--border);">
+                <span style="font-size: 0.875rem; font-weight: 600;">Lançamentos</span>
+                <span class="text-muted-sm">@Model.Count() registros</span>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>Nenhum lançamento ainda.<br><a asp-action="Criar" style="color: var(--text-2);">Adicionar o primeiro</a></p>
+                </div>
+            }
+            else
+            {
                 @foreach (var item in Model)
                 {
-                    var cor = item.Valor >= 0 ? "text-success" : "text-danger";
-                    var icone = item.Valor >= 0 ? "bi-arrow-up" : "bi-arrow-down";
-                    
-                    <div class="list-group-item py-3 d-flex justify-content-between align-items-center hover-bg-light">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-light p-2 me-3 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
-                                <i class="bi @icone @cor fs-5"></i>
+                    var isReceita = item.Tipo == PocketFinance.Core.TipoTransacao.Receita;
+                    <div class="pf-list-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-circle @(isReceita ? "icon-up" : "icon-down")">
+                                <i class="bi @(isReceita ? "bi-arrow-up" : "bi-arrow-down")"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold text-dark">@item.Descricao</h6>
-                                <small class="text-muted">@item.Categoria • @item.Data.ToString("dd/MM/yyyy")</small>
+                                <div style="font-size: 0.875rem; font-weight: 500;">@item.Descricao</div>
+                                <div class="text-muted-sm">@item.Categoria · @item.Data.ToString("dd/MM/yyyy")</div>
                             </div>
                         </div>
-
-                        <div class="text-end">
-                            <span class="d-block fw-bold fs-5 @cor mb-1">
-                                @item.Valor.ToString("C", cultura)
+                        <div class="d-flex align-items-center gap-3">
+                            <span style="font-size: 0.9375rem; font-weight: 600; color: @(isReceita ? "#166534" : "#991b1b");">
+                                @(isReceita ? "+" : "")@item.Valor.ToString("C", cultura)
                             </span>
-                            
-                            <div class="btn-group btn-group-sm">
-                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-outline-secondary border-0" title="Editar">
-                                    <i class="bi bi-pencil-square"></i>
+                            <div class="pf-list-actions">
+                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn-pf btn-pf-ghost btn-pf-sm" title="Editar">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
-                                <a asp-action="Deletar" asp-route-id="@item.Id" class="btn btn-outline-danger border-0" title="Excluir" onclick="return confirm('Tem certeza?');">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                <form asp-action="Deletar" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-pf btn-pf-danger btn-pf-sm" title="Excluir" onclick="return confirm('Excluir este lançamento?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 }
-            </div>
+            }
         </div>
-    }
+    </div>
+
+    <!-- Chart -->
+    <div class="col-lg-5">
+        <div class="pf-card h-100">
+            <div style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Despesas por categoria</div>
+            <p class="text-muted-sm mb-3">Distribuição do período</p>
+            @if ((ViewBag.GraficoLabels as string[])?.Length > 0)
+            {
+                <div style="position: relative; max-height: 280px;">
+                    <canvas id="graficoCategoria"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state" style="padding: 2rem 1rem;">
+                    <i class="bi bi-pie-chart" style="font-size: 1.75rem;"></i>
+                    <p style="font-size: 0.8125rem;">Sem despesas para exibir</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var ctx = document.getElementById('meuGrafico').getContext('2d');
-        
-        // Cores "Maduras" (Palette moderna)
-        var cores = [
-            '#2c3e50', // Azul Petróleo Escuro
-            '#e67e22', // Laranja Queimado
-            '#27ae60', // Verde Floresta
-            '#c0392b', // Vermelho Tijolo
-            '#7f8c8d', // Cinza Concreto
-            '#8e44ad'  // Roxo Sóbrio
-        ];
+    (function () {
+        var canvas = document.getElementById('graficoCategoria');
+        if (!canvas) return;
 
-        new Chart(ctx, {
+        var cores = ['#1e293b','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+
+        new Chart(canvas.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: @Html.Raw(labelsJson),
                 datasets: [{
                     data: @Html.Raw(valoresJson),
                     backgroundColor: cores,
-                    borderWidth: 0, // Sem borda para ficar clean
-                    hoverOffset: 10
+                    borderWidth: 0,
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '68%',
                 plugins: {
                     legend: {
-                        position: 'right',
-                        labels: {
-                            font: { size: 12, family: "'Segoe UI', sans-serif" },
-                            usePointStyle: true,
-                            boxWidth: 10
-                        }
+                        position: 'bottom',
+                        labels: { font: { size: 11, family: 'Inter' }, usePointStyle: true, padding: 12 }
                     }
-                },
-                cutout: '70%', // Rosca fina (elegante)
+                }
             }
         });
-    });
+    })();
 </script>
-
-<style>
-    .hover-bg-light:hover { background-color: #f8f9fa; transition: 0.2s; }
-</style>
+}

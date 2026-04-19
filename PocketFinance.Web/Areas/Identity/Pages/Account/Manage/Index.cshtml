@@ -1,45 +1,41 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Perfil";
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<div class="card shadow-sm border-0 rounded-4">
-    <div class="card-header bg-white py-3 border-0">
-        <h5 class="mb-0 fw-bold text-primary">Informações Básicas</h5>
+<div class="pf-card">
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+        <div class="sidebar-avatar" style="width: 48px; height: 48px; font-size: 1rem;">
+            @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+        </div>
+        <div>
+            <div style="font-weight: 600; font-size: 0.9375rem;">@User.Identity?.Name</div>
+            <div class="text-muted-sm">Usuário do PocketFinance</div>
+        </div>
     </div>
-    <div class="card-body p-4">
-        <div class="d-flex align-items-center mb-4">
-            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
-                 style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
-                <i class="bi bi-person"></i>
-            </div>
+
+    <partial name="_StatusMessage" model="Model.StatusMessage" />
+
+    <form id="profile-form" method="post">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
             <div>
-                <h5 class="fw-bold mb-0">@User.Identity?.Name</h5>
-                <small class="text-muted">Usuário do PocketFinance</small>
+                <label class="pf-label">E-mail</label>
+                <input asp-for="Username" class="pf-input" disabled style="background: var(--bg-page); color: var(--text-2);" />
+            </div>
+
+            <div>
+                <label class="pf-label" asp-for="Input.PhoneNumber">Telefone</label>
+                <input asp-for="Input.PhoneNumber" class="pf-input" placeholder="(00) 00000-0000" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size: 0.8125rem;"></span>
+            </div>
+
+            <div>
+                <button type="submit" class="btn-pf btn-pf-primary">Salvar alterações</button>
             </div>
         </div>
-
-        <partial name="_StatusMessage" model="Model.StatusMessage" />
-
-        <form id="profile-form" method="post">
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control bg-light" disabled />
-                <label asp-for="Username" class="form-label"></label>
-            </div>
-            
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="(00) 00000-0000" />
-                <label asp-for="Input.PhoneNumber" class="form-label">Número de Telefone</label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-            </div>
-
-            <button id="update-profile-button" type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                Salvar Alterações
-            </button>
-        </form>
-    </div>
+    </form>
 </div>
 
 @section Scripts {

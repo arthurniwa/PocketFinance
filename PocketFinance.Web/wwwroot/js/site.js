@@ -1,4 +1,21 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+const formatarMoeda = (input) => {
+    let valor = input.value.replace(/\D/g, "");
 
-// Write your JavaScript code.
+    if (valor === "") {
+        input.value = "";
+        return;
+    }
+
+    valor = (Number(valor) / 100).toFixed(2) + "";
+    valor = valor.replace(".", ",");
+    valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+
+    input.value = valor;
+};
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.money').forEach(input => {
+        formatarMoeda(input);
+        input.addEventListener('input', (e) => formatarMoeda(e.target));
+    });
+});

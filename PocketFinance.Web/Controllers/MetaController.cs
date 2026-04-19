@@ -2,21 +2,24 @@ using Microsoft.AspNetCore.Mvc;
 using PocketFinance.Core;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using System.Linq;
-using System;
 
 namespace PocketFinance.Web.Controllers
 {
     [Authorize]
     public class MetaController : Controller
     {
+        private readonly AppDbContext _db;
+
+        public MetaController(AppDbContext db)
+        {
+            _db = db;
+        }
+
         public IActionResult Index()
         {
-            using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            // Traz as metas ordenadas pela data alvo (as mais urgentes primeiro)
-            var metas = db.Metas
+
+            var metas = _db.Metas
                 .Where(m => m.UsuarioId == meuId)
                 .OrderBy(m => m.DataAlvo)
                 .ToList();
@@ -24,21 +27,19 @@ namespace PocketFinance.Web.Controllers
             return View(metas);
         }
 
-        // --- AÇÃO RÁPIDA: DEPOSITAR ---
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Depositar(int id, decimal valorExtra)
         {
-            using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
-            
+            var meta = _db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+
             if (meta != null && valorExtra > 0)
             {
-                meta.ValorAtual += valorExtra; // Soma o valor novo
-                db.SaveChanges();
+                meta.ValorAtual += valorExtra;
+                _db.SaveChanges();
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -48,15 +49,15 @@ namespace PocketFinance.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Criar(Meta meta)
         {
-            using var db = new AppDbContext();
             meta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             if (ModelState.IsValid)
             {
-                db.Metas.Add(meta);
-                db.SaveChanges();
+                _db.Metas.Add(meta);
+                _db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(meta);
@@ -64,39 +65,43 @@ namespace PocketFinance.Web.Controllers
 
         public IActionResult Editar(int id)
         {
-            using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+            var meta = _db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
             if (meta == null) return NotFound();
             return View(meta);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Editar(Meta meta)
         {
-            using var db = new AppDbContext();
-            // Garante que não perde o dono da meta
-            meta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var existente = _db.Metas.FirstOrDefault(m => m.Id == meta.Id && m.UsuarioId == meuId);
+            if (existente == null) return Forbid();
+
             if (ModelState.IsValid)
             {
-                db.Metas.Update(meta);
-                db.SaveChanges();
+                existente.Nome = meta.Nome;
+                existente.ValorMeta = meta.ValorMeta;
+                existente.DataAlvo = meta.DataAlvo;
+                _db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(meta);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Deletar(int id)
         {
-            using var db = new AppDbContext();
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var meta = db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
-            
+            var meta = _db.Metas.FirstOrDefault(m => m.Id == id && m.UsuarioId == meuId);
+
             if (meta != null)
             {
-                db.Metas.Remove(meta);
-                db.SaveChanges();
+                _db.Metas.Remove(meta);
+                _db.SaveChanges();
             }
             return RedirectToAction("Index");
         }

@@ -1,119 +1,57 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PocketFinance</title>
-    
+    <title>PocketFinance — @ViewData["Title"]</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
-    <style>
-        body {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-
-        /* Estilo do Menu Lateral (Gaveta) */
-        .offcanvas {
-            background-color: #212529; /* Cor escura igual antes */
-            color: white;
-            width: 280px !important; /* Largura do menu */
-        }
-
-        /* Links do Menu */
-        .nav-link {
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 10px;
-            border-radius: 5px;
-            padding: 10px 15px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background-color: #0d6efd;
-            color: white;
-        }
-        
-        .nav-link i { margin-right: 12px; font-size: 1.2rem; }
-
-        /* Botão do Menu Flutuante */
-        .btn-menu-trigger {
-            font-size: 1.5rem;
-            padding: 5px 15px;
-            border: none;
-            background: transparent;
-            color: #333;
-            cursor: pointer;
-        }
-        
-        .btn-menu-trigger:hover {
-            color: #0d6efd;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
 
-    <nav class="navbar navbar-light bg-white shadow-sm fixed-top">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            
-            <div class="d-flex align-items-center">
-                <button class="btn-menu-trigger me-3 border-0 bg-transparent" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
-                    <i class="bi bi-list fs-3"></i> 
-                </button>
-                <span class="navbar-brand mb-0 h1 fw-bold text-primary">💰 PocketFinance</span>
-            </div>
+    @{
+        var nomeUsuario = User.Claims.FirstOrDefault(c => c.Type == "NomeCompleto")?.Value ?? User.Identity?.Name ?? "";
+        var iniciais = string.Join("", nomeUsuario.Split(' ').Take(2).Select(p => p.Length > 0 ? p[0].ToString().ToUpper() : ""));
+        var paginaAtual = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
 
-            <div>
-                <ul class="navbar-nav d-flex flex-row align-items-center gap-3">
-                    <partial name="_LoginPartial" />
-                </ul>
-            </div>
-            
+    <!-- Mobile topbar -->
+    <div class="topbar-mobile">
+        <button class="btn border-0 p-1 text-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+        <span class="topbar-brand">PocketFinance</span>
+    </div>
+
+    <!-- Mobile sidebar (offcanvas) -->
+    <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileSidebar" style="width: var(--sidebar-width, 260px);">
+        <div class="offcanvas-header border-bottom py-3">
+            <span class="fw-bold" style="font-size: 0.9375rem;"><i class="bi bi-wallet2 text-primary me-2"></i>PocketFinance</span>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
-    </nav>
-
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title fw-bold text-white">Menu</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        
-        <div class="offcanvas-body d-flex flex-column">
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a asp-controller="Home" asp-action="Index" class="nav-link">
-                        <i class="bi bi-house-door"></i> Início
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="Transacao" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-cash-coin"></i> Minhas Finanças
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="Meta" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-bullseye"></i> Metas
-                    </a>
-                </li>
-            </ul>
-
-            <hr class="text-white">
-
-            <div class="mt-auto">
-                <div class="d-flex align-items-center text-white mb-3">
-                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
-                        👤
-                    </div>
-                    <div class="fw-bold text-truncate" style="max-width: 180px;">
-                        @(User.Claims.FirstOrDefault(c => c.Type == "NomeCompleto")?.Value ?? User.Identity?.Name)
-                    </div>
+        <div class="offcanvas-body p-0 d-flex flex-column">
+            <nav class="sidebar-nav">
+                <a asp-controller="Home" asp-action="Index" class="sidebar-link @(paginaAtual == "Home" ? "active" : "")">
+                    <i class="bi bi-house-door"></i> Início
+                </a>
+                <a asp-controller="Transacao" asp-action="Index" class="sidebar-link @(paginaAtual == "Transacao" ? "active" : "")">
+                    <i class="bi bi-cash-coin"></i> Finanças
+                </a>
+                <a asp-controller="Meta" asp-action="Index" class="sidebar-link @(paginaAtual == "Meta" ? "active" : "")">
+                    <i class="bi bi-bullseye"></i> Metas
+                </a>
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-link @(paginaAtual == "Manage" ? "active" : "")">
+                    <i class="bi bi-person-gear"></i> Conta
+                </a>
+            </nav>
+            <div class="sidebar-footer mt-auto">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar">@iniciais</div>
+                    <span class="sidebar-username">@nomeUsuario</span>
                 </div>
-
-                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                    <button type="submit" class="btn btn-outline-danger w-100">
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="btn-pf btn-pf-ghost w-100" style="justify-content: center;">
                         <i class="bi bi-box-arrow-left"></i> Sair
                     </button>
                 </form>
@@ -121,51 +59,44 @@
         </div>
     </div>
 
-    <div class="container pt-5 mt-5">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <!-- Desktop sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <i class="bi bi-wallet2"></i> PocketFinance
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-controller="Home" asp-action="Index" class="sidebar-link @(paginaAtual == "Home" ? "active" : "")">
+                <i class="bi bi-house-door"></i> Início
+            </a>
+            <a asp-controller="Transacao" asp-action="Index" class="sidebar-link @(paginaAtual == "Transacao" ? "active" : "")">
+                <i class="bi bi-cash-coin"></i> Finanças
+            </a>
+            <a asp-controller="Meta" asp-action="Index" class="sidebar-link @(paginaAtual == "Meta" ? "active" : "")">
+                <i class="bi bi-bullseye"></i> Metas
+            </a>
+            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-link">
+                <i class="bi bi-person-gear"></i> Conta
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-avatar">@iniciais</div>
+                <span class="sidebar-username">@nomeUsuario</span>
+            </div>
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="btn-pf btn-pf-ghost w-100" style="justify-content: center;">
+                    <i class="bi bi-box-arrow-left"></i> Sair
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="main-content">
+        @RenderBody()
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-<script>
-        // 1. A Lógica de Formatação
-        const formatarMoeda = (input) => {
-            let valor = input.value;
-            
-            // Remove tudo que não é número
-            valor = valor.replace(/\D/g, "");
-            
-            if (valor === "") {
-                input.value = "";
-                return;
-            }
-            
-            // Divide por 100 para ter centavos
-            valor = (Number(valor) / 100).toFixed(2) + "";
-            
-            // Troca ponto por vírgula e põe milhar
-            valor = valor.replace(".", ",");
-            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-            
-            input.value = valor;
-        }
-
-        // 2. O Observador (Aplica em tudo que tiver a classe 'money')
-        document.addEventListener("DOMContentLoaded", function() {
-            // Pega todos os campos money
-            const inputs = document.querySelectorAll('.money');
-            
-            inputs.forEach(input => {
-                // Formata assim que a página abre (se já tiver valor)
-                formatarMoeda(input);
-                
-                // Formata sempre que alguém digitar
-                input.addEventListener('input', (e) => formatarMoeda(e.target));
-            });
-        });
-    </script>
 </html>

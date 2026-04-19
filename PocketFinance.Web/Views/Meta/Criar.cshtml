@@ -1,40 +1,48 @@
 @model PocketFinance.Core.Meta
+@{ ViewData["Title"] = "Nova meta"; }
 
-@{ ViewData["Title"] = "Nova Meta"; }
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Nova meta</h1>
+        <p class="page-subtitle">Defina um objetivo financeiro</p>
+    </div>
+    <a asp-action="Index" class="btn-pf btn-pf-ghost">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
 
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow border-0 rounded-4">
-            <div class="card-header bg-primary text-white py-3 rounded-top-4">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-rocket-takeoff"></i> Criar Nova Meta</h5>
-            </div>
-            <div class="card-body p-4">
-                <form asp-action="Criar">
-                    
-                    <div class="form-floating mb-3">
-                        <input asp-for="Nome" class="form-control" placeholder="Ex: Viagem Disney" />
-                        <label asp-for="Nome">Nome do Objetivo</label>
-                        <span asp-validation-for="Nome" class="text-danger small"></span>
-                    </div>
+    <div class="col-md-6 col-lg-5">
+        <div class="pf-card">
+            <form asp-action="Criar">
 
-                    <div class="form-floating mb-3">
-                        <input asp-for="ValorMeta" type="number" step="0.01" class="form-control" placeholder="0,00" />
-                        <label asp-for="ValorMeta">Valor Total (R$)</label>
-                        <span asp-validation-for="ValorMeta" class="text-danger small"></span>
-                    </div>
+                <div class="mb-3">
+                    <label class="pf-label" asp-for="Nome">Nome do objetivo</label>
+                    <input asp-for="Nome" class="pf-input" placeholder="Ex: Viagem, Notebook, Reserva..." />
+                    <span asp-validation-for="Nome" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
 
-                    <div class="form-floating mb-4">
-                        <input asp-for="DataAlvo" type="date" class="form-control" />
-                        <label asp-for="DataAlvo">Data Alvo</label>
-                        <span asp-validation-for="DataAlvo" class="text-danger small"></span>
-                    </div>
+                <div class="mb-3">
+                    <label class="pf-label" asp-for="ValorMeta">Valor total (R$)</label>
+                    <input asp-for="ValorMeta" type="number" step="0.01" class="pf-input pf-input-value" placeholder="0,00" />
+                    <span asp-validation-for="ValorMeta" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Criar Meta</button>
-                        <a asp-action="Index" class="btn btn-link text-muted text-decoration-none">Cancelar</a>
-                    </div>
-                </form>
-            </div>
+                <div class="mb-4">
+                    <label class="pf-label" asp-for="DataAlvo">Data alvo</label>
+                    <input asp-for="DataAlvo" type="date" class="pf-input" />
+                    <span asp-validation-for="DataAlvo" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <button type="submit" class="btn-pf btn-pf-primary w-100" style="justify-content: center; padding: 0.625rem;">
+                    Criar meta
+                </button>
+
+            </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
