@@ -41,6 +41,9 @@
                 <a asp-controller="Meta" asp-action="Index" class="sidebar-link @(paginaAtual == "Meta" ? "active" : "")">
                     <i class="bi bi-bullseye"></i> Metas
                 </a>
+                <a asp-controller="CadastroConta" asp-action="Index" class="sidebar-link @(paginaAtual == "CadastroConta" ? "active" : "")">
+                    <i class="bi bi-bank"></i> Contas
+                </a>
                 <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-link @(paginaAtual == "Manage" ? "active" : "")">
                     <i class="bi bi-person-gear"></i> Conta
                 </a>
@@ -71,11 +74,14 @@
             <a asp-controller="Transacao" asp-action="Index" class="sidebar-link @(paginaAtual == "Transacao" ? "active" : "")">
                 <i class="bi bi-cash-coin"></i> Finanças
             </a>
+            <a asp-controller="CadastroConta" asp-action="Index" class="sidebar-link @(paginaAtual == "CadastroConta" ? "active" : "")">
+                <i class="bi bi-bank"></i> Contas
+            </a>
             <a asp-controller="Meta" asp-action="Index" class="sidebar-link @(paginaAtual == "Meta" ? "active" : "")">
                 <i class="bi bi-bullseye"></i> Metas
             </a>
             <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-link">
-                <i class="bi bi-person-gear"></i> Conta
+                <i class="bi bi-person-gear"></i> Minha Conta
             </a>
         </nav>
         <div class="sidebar-footer">
