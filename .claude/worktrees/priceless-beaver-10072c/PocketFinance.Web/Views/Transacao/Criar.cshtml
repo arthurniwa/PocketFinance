@@ -1,0 +1,77 @@
+@model PocketFinance.Core.Transacao
+@{ ViewData["Title"] = "Novo lançamento"; }
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Novo lançamento</h1>
+        <p class="page-subtitle">Registre uma receita ou despesa</p>
+    </div>
+    <a asp-action="Index" class="btn-pf btn-pf-ghost">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="pf-card">
+            <form asp-action="Criar">
+
+                <div class="mb-4">
+                    <label class="pf-label">Tipo</label>
+                    <div class="type-toggle">
+                        <input type="radio" asp-for="Tipo" value="0" id="tipoDespesa" checked>
+                        <label for="tipoDespesa"><i class="bi bi-arrow-down-circle"></i> Despesa</label>
+                        <input type="radio" asp-for="Tipo" value="1" id="tipoReceita">
+                        <label for="tipoReceita"><i class="bi bi-arrow-up-circle"></i> Receita</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="pf-label" asp-for="Valor">Valor (R$)</label>
+                    <input asp-for="Valor" type="text" class="pf-input pf-input-value money" placeholder="0,00" required />
+                    <span asp-validation-for="Valor" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="pf-label" asp-for="Descricao">Descrição</label>
+                    <input asp-for="Descricao" class="pf-input" placeholder="Ex: Mercado, Salário..." required />
+                    <span asp-validation-for="Descricao" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-7">
+                        <label class="pf-label" asp-for="Categoria">Categoria</label>
+                        <select asp-for="Categoria" class="pf-input pf-select">
+                            <optgroup label="Despesas">
+                                <option value="Alimentacao">Alimentação</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Moradia">Moradia</option>
+                                <option value="Lazer">Lazer</option>
+                                <option value="Contas">Contas</option>
+                                <option value="Saude">Saúde</option>
+                                <option value="Educacao">Educação</option>
+                            </optgroup>
+                            <optgroup label="Receitas">
+                                <option value="Salario">Salário</option>
+                                <option value="Extra">Extra</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <label class="pf-label" asp-for="Data">Data</label>
+                        <input asp-for="Data" type="date" class="pf-input" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-pf btn-pf-primary w-100" style="justify-content: center; padding: 0.625rem;">
+                    Salvar lançamento
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

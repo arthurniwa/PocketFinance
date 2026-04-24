@@ -1,0 +1,167 @@
+@model IEnumerable<PocketFinance.Core.Transacao>
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Finanças";
+    var cultura = new System.Globalization.CultureInfo("pt-BR");
+    var labelsJson = JsonSerializer.Serialize(ViewBag.GraficoLabels as string[] ?? Array.Empty<string>());
+    var valoresJson = JsonSerializer.Serialize(ViewBag.GraficoValores as decimal[] ?? Array.Empty<decimal>());
+    var saldo = (decimal)ViewBag.Saldo;
+    var entradas = (decimal)ViewBag.Entradas;
+    var saidas = (decimal)ViewBag.Saidas;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Finanças</h1>
+        <p class="page-subtitle">Controle de receitas e despesas</p>
+    </div>
+    <a asp-action="Criar" class="btn-pf btn-pf-primary">
+        <i class="bi bi-plus"></i> Novo lançamento
+    </a>
+</div>
+
+<!-- Metric cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="pf-card h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="pf-card-label">Saldo atual</span>
+                <span class="pf-badge @(saldo >= 0 ? "pf-badge-neutral" : "pf-badge-down")">
+                    <i class="bi @(saldo >= 0 ? "bi-wallet2" : "bi-exclamation-circle")"></i>
+                </span>
+            </div>
+            <span class="pf-card-value @(saldo >= 0 ? "" : "text-danger")">@saldo.ToString("C", cultura)</span>
+            <p class="text-muted-sm mt-2 mb-0">Resultado do período</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pf-card h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="pf-card-label">Receitas</span>
+                <span class="pf-badge pf-badge-up"><i class="bi bi-arrow-up"></i></span>
+            </div>
+            <span class="pf-card-value" style="color: #166534;">@entradas.ToString("C", cultura)</span>
+            <p class="text-muted-sm mt-2 mb-0">Total de entradas</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pf-card h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="pf-card-label">Despesas</span>
+                <span class="pf-badge pf-badge-down"><i class="bi bi-arrow-down"></i></span>
+            </div>
+            <span class="pf-card-value" style="color: #991b1b;">@Math.Abs(saidas).ToString("C", cultura)</span>
+            <p class="text-muted-sm mt-2 mb-0">Total de saídas</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Transaction list -->
+    <div class="col-lg-7">
+        <div class="pf-card p-0">
+            <div class="d-flex justify-content-between align-items-center px-4 py-3" style="border-bottom: 1px solid var(--border);">
+                <span style="font-size: 0.875rem; font-weight: 600;">Lançamentos</span>
+                <span class="text-muted-sm">@Model.Count() registros</span>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>Nenhum lançamento ainda.<br><a asp-action="Criar" style="color: var(--text-2);">Adicionar o primeiro</a></p>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    var isReceita = item.Tipo == PocketFinance.Core.TipoTransacao.Receita;
+                    <div class="pf-list-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-circle @(isReceita ? "icon-up" : "icon-down")">
+                                <i class="bi @(isReceita ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; font-weight: 500;">@item.Descricao</div>
+                                <div class="text-muted-sm">@item.Categoria · @item.Data.ToString("dd/MM/yyyy")</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span style="font-size: 0.9375rem; font-weight: 600; color: @(isReceita ? "#166534" : "#991b1b");">
+                                @(isReceita ? "+" : "")@item.Valor.ToString("C", cultura)
+                            </span>
+                            <div class="pf-list-actions">
+                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn-pf btn-pf-ghost btn-pf-sm" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="Deletar" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-pf btn-pf-danger btn-pf-sm" title="Excluir" onclick="return confirm('Excluir este lançamento?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="col-lg-5">
+        <div class="pf-card h-100">
+            <div style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Despesas por categoria</div>
+            <p class="text-muted-sm mb-3">Distribuição do período</p>
+            @if ((ViewBag.GraficoLabels as string[])?.Length > 0)
+            {
+                <div style="position: relative; max-height: 280px;">
+                    <canvas id="graficoCategoria"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state" style="padding: 2rem 1rem;">
+                    <i class="bi bi-pie-chart" style="font-size: 1.75rem;"></i>
+                    <p style="font-size: 0.8125rem;">Sem despesas para exibir</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    (function () {
+        var canvas = document.getElementById('graficoCategoria');
+        if (!canvas) return;
+
+        var cores = ['#1e293b','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(labelsJson),
+                datasets: [{
+                    data: @Html.Raw(valoresJson),
+                    backgroundColor: cores,
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 11, family: 'Inter' }, usePointStyle: true, padding: 12 }
+                    }
+                }
+            }
+        });
+    })();
+</script>
+}

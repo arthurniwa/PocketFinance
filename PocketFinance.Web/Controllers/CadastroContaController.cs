@@ -37,4 +37,37 @@ public class CadastroContaController : Controller
         _db.SaveChanges();
         return RedirectToAction("Index");
     }
+
+    public IActionResult Editar(int id)
+    {
+        var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var conta = _db.Contas.FirstOrDefault(c => c.Id == id && c.UsuarioId == usuarioId);
+
+        if(conta == null )
+        {
+            return NotFound();
+        }
+
+        return View(conta);
+
+    }
+
+    [HttpPost]
+    public IActionResult Editar( int id, Conta conta)
+    {
+        var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var contaDb = _db.Contas.FirstOrDefault(c => c.Id == id && c.UsuarioId == usuarioId);
+
+        if(contaDb == null)
+        {
+            return NotFound();
+        }
+
+        contaDb.Nome  = conta.Nome;
+        contaDb.Tipo  = conta.Tipo;
+        contaDb.Saldo = conta.Saldo;
+
+        _db.SaveChanges();
+        return RedirectToAction("Index"); 
+    }
 }

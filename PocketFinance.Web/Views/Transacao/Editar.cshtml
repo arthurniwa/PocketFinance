@@ -63,6 +63,16 @@
                         <input asp-for="Data" type="date" class="pf-input" />
                     </div>
                 </div>
+                <div class="mb-4">
+                    <label class="pf-label">Conta <span style="color: var(--text-3); font-weight: 400;">(opcional)</span></label>
+                        <select asp-for="ContaId" class="pf-input pf-select">
+                            <option value="">Nenhuma</option>
+                            @foreach (var conta in ViewBag.Contas as List<PocketFinance.Core.Conta>)
+                            {
+                                <option value="@conta.Id">@conta.Nome (@conta.Tipo)</option>
+                            }
+                        </select>
+                </div>
 
                 <button type="submit" class="btn-pf btn-pf-primary w-100" style="justify-content: center; padding: 0.625rem;">
                     Salvar alterações

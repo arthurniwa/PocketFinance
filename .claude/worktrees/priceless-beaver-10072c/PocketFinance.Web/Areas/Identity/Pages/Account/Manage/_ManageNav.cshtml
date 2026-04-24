@@ -1,0 +1,19 @@
+@inject SignInManager<IdentityUser> SignInManager
+@{
+    var pagina = ViewContext.RouteData.Values["Page"]?.ToString();
+}
+
+<nav style="display: flex; flex-direction: column; gap: 2px;">
+    <a class="sidebar-link @(pagina == "/Account/Manage/Index" ? "active" : "")" asp-page="./Index">
+        <i class="bi bi-person"></i> Meu perfil
+    </a>
+    <a class="sidebar-link @(pagina == "/Account/Manage/Email" ? "active" : "")" asp-page="./Email">
+        <i class="bi bi-envelope"></i> E-mail
+    </a>
+    <a class="sidebar-link @(pagina == "/Account/Manage/ChangePassword" ? "active" : "")" asp-page="./ChangePassword">
+        <i class="bi bi-shield-lock"></i> Alterar senha
+    </a>
+    <a class="sidebar-link @(pagina == "/Account/Manage/PersonalData" ? "active" : "")" asp-page="./PersonalData">
+        <i class="bi bi-hdd-network"></i> Dados pessoais
+    </a>
+</nav>

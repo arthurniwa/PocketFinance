@@ -1,0 +1,116 @@
+@model IEnumerable<PocketFinance.Core.Meta>
+@{
+    ViewData["Title"] = "Metas";
+    var cultura = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Metas</h1>
+        <p class="page-subtitle">Acompanhe seus objetivos financeiros</p>
+    </div>
+    <a asp-action="Criar" class="btn-pf btn-pf-primary">
+        <i class="bi bi-plus"></i> Nova meta
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="pf-card">
+        <div class="empty-state">
+            <i class="bi bi-bullseye"></i>
+            <p>Nenhuma meta criada ainda.<br><a asp-action="Criar" style="color: var(--text-2);">Criar a primeira meta</a></p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var item in Model)
+        {
+            var progresso = item.ValorMeta > 0 ? Math.Min((item.ValorAtual / item.ValorMeta) * 100, 100) : 0;
+            var diasRestantes = (item.DataAlvo - DateTime.Now).Days;
+            var corBarra = progresso >= 100 ? "#10b981" : progresso < 30 ? "#ef4444" : progresso < 70 ? "#f59e0b" : "#3b82f6";
+
+            <div class="col-md-6 col-lg-4">
+                <div class="goal-card">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div style="font-size: 0.9375rem; font-weight: 600;">@item.Nome</div>
+                            <div class="text-muted-sm mt-0.5">
+                                <i class="bi bi-calendar3"></i> @item.DataAlvo.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        <div class="icon-circle icon-blue">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-baseline mb-1">
+                            <span style="font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em;">
+                                @item.ValorAtual.ToString("C", cultura)
+                            </span>
+                            <span class="text-muted-sm">de @item.ValorMeta.ToString("C", cultura)</span>
+                        </div>
+                        <div class="pf-progress">
+                            <div class="pf-progress-bar" style="width: @progresso.ToString("0", System.Globalization.CultureInfo.InvariantCulture)%; background: @corBarra;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <span class="text-muted-sm" style="color: @corBarra !important; font-weight: 500;">@progresso.ToString("0")% concluído</span>
+                            <span class="text-muted-sm @(diasRestantes < 0 ? "text-danger" : "")">
+                                @(diasRestantes < 0 ? "Atrasado" : $"{diasRestantes}d restantes")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto d-flex flex-column gap-2">
+                        <button type="button" class="btn-pf btn-pf-ghost w-100" style="justify-content: center;"
+                                data-bs-toggle="modal" data-bs-target="#depositar-@item.Id">
+                            <i class="bi bi-piggy-bank"></i> Guardar dinheiro
+                        </button>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Editar" asp-route-id="@item.Id" class="btn-pf btn-pf-ghost flex-fill" style="justify-content: center;">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form asp-action="Deletar" asp-route-id="@item.Id" method="post" class="flex-fill">
+                                <button type="submit" class="btn-pf btn-pf-danger w-100" style="justify-content: center;"
+                                        onclick="return confirm('Excluir esta meta?')">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Modal depósito -->
+            <div class="modal fade" id="depositar-@item.Id" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 rounded-3 shadow-lg">
+                        <div class="modal-header border-bottom" style="padding: 1.25rem 1.5rem;">
+                            <div>
+                                <h6 class="modal-title fw-semibold mb-0">Guardar em "@item.Nome"</h6>
+                                <small class="text-muted">Saldo atual: @item.ValorAtual.ToString("C", cultura)</small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form asp-action="Depositar" method="post">
+                            <div class="modal-body" style="padding: 1.25rem 1.5rem;">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <label class="pf-label">Valor a guardar (R$)</label>
+                                <input type="number" name="valorExtra" class="pf-input" placeholder="0,00" step="0.01" min="0.01" required />
+                            </div>
+                            <div class="modal-footer border-top" style="padding: 1rem 1.5rem;">
+                                <button type="button" class="btn-pf btn-pf-ghost" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn-pf btn-pf-primary">Confirmar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

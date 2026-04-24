@@ -1,0 +1,42 @@
+@page
+@model EmailModel
+@{
+    ViewData["Title"] = "E-mail";
+    ViewData["ActivePage"] = ManageNavPages.Email;
+}
+
+<div class="pf-card">
+    <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+        <div style="font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.25rem;">E-mail da conta</div>
+        <p class="text-muted-sm" style="margin: 0;">Altere o endereço de e-mail associado à sua conta.</p>
+    </div>
+
+    <partial name="_StatusMessage" for="StatusMessage" />
+
+    <form id="email-form" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3" style="font-size: 0.875rem;" role="alert"></div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label class="pf-label">E-mail atual</label>
+                <input asp-for="Email" class="pf-input" disabled style="background: var(--bg-page); color: var(--text-2);" />
+            </div>
+
+            <div>
+                <label class="pf-label" asp-for="Input.NewEmail">Novo e-mail</label>
+                <input asp-for="Input.NewEmail" class="pf-input" autocomplete="email" placeholder="novo@email.com" />
+                <span asp-validation-for="Input.NewEmail" class="text-danger" style="font-size: 0.8125rem;"></span>
+            </div>
+
+            <div>
+                <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn-pf btn-pf-primary">
+                    Atualizar e-mail
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

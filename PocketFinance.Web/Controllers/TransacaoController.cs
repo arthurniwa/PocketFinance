@@ -49,6 +49,7 @@ namespace PocketFinance.Web.Controllers
             var t = _db.Transacoes.FirstOrDefault(x => x.Id == id && x.UsuarioId == meuId);
             if (t == null) return NotFound();
 
+            ViewBag.Contas = _db.Contas.Where(c => c.UsuarioId == meuId).ToList();
             t.Valor = Math.Abs(t.Valor);
             return View(t);
         }
@@ -82,6 +83,8 @@ namespace PocketFinance.Web.Controllers
 
         public IActionResult Criar()
         {
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.Contas = _db.Contas.Where(c => c.UsuarioId == meuId).ToList();
             return View(new Transacao { Data = DateTime.Now });
         }
 

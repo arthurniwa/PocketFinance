@@ -1,6 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations; 
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.Contracts;
 
 
 
@@ -23,7 +25,7 @@ namespace PocketFinance.Core
 
         public TipoTransacao Tipo { get; set; }
 
-        
+        public int? ContaId { get; set; }
 
         public string UsuarioId { get; set;} = string.Empty;
     }

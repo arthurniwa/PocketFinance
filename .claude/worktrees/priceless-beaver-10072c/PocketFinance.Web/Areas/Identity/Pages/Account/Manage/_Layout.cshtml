@@ -1,0 +1,23 @@
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Configurações da conta</h1>
+        <p class="page-subtitle">Gerencie suas informações pessoais e segurança</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <partial name="_ManageNav" />
+    </div>
+    <div class="col-md-9">
+        @RenderBody()
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}

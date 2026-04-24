@@ -1,0 +1,43 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Perfil";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<div class="pf-card">
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+        <div class="sidebar-avatar" style="width: 48px; height: 48px; font-size: 1rem;">
+            @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+        </div>
+        <div>
+            <div style="font-weight: 600; font-size: 0.9375rem;">@User.Identity?.Name</div>
+            <div class="text-muted-sm">Usuário do PocketFinance</div>
+        </div>
+    </div>
+
+    <partial name="_StatusMessage" model="Model.StatusMessage" />
+
+    <form id="profile-form" method="post">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label class="pf-label">E-mail</label>
+                <input asp-for="Username" class="pf-input" disabled style="background: var(--bg-page); color: var(--text-2);" />
+            </div>
+
+            <div>
+                <label class="pf-label" asp-for="Input.PhoneNumber">Telefone</label>
+                <input asp-for="Input.PhoneNumber" class="pf-input" placeholder="(00) 00000-0000" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size: 0.8125rem;"></span>
+            </div>
+
+            <div>
+                <button type="submit" class="btn-pf btn-pf-primary">Salvar alterações</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

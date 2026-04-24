@@ -1,0 +1,58 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Entrar";
+    Layout = "/Views/Shared/_LayoutExterno.cshtml";
+}
+
+<div style="width: 100%; max-width: 400px;">
+    <div class="text-center mb-6" style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">Bem-vindo de volta</h1>
+        <p style="font-size: 0.875rem; color: var(--text-2); margin: 0;">Entre na sua conta para continuar</p>
+    </div>
+
+    <div class="pf-card">
+        <form id="account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 0.875rem;" role="alert"></div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label class="pf-label" asp-for="Input.Email">E-mail</label>
+                    <input asp-for="Input.Email" class="pf-input" autocomplete="username" placeholder="seu@email.com" />
+                    <span asp-validation-for="Input.Email" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div>
+                    <label class="pf-label" asp-for="Input.Password">Senha</label>
+                    <input asp-for="Input.Password" class="pf-input" autocomplete="current-password" placeholder="••••••••" />
+                    <span asp-validation-for="Input.Password" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-2); cursor: pointer;">
+                        <input class="form-check-input" asp-for="Input.RememberMe" style="margin: 0;" />
+                        Lembrar de mim
+                    </label>
+                    <a id="forgot-password" asp-page="./ForgotPassword" style="font-size: 0.875rem; color: var(--text-2); text-decoration: none;">
+                        Esqueceu a senha?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-pf btn-pf-primary w-100" style="justify-content: center; padding: 0.625rem;">
+                    Entrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <p style="text-align: center; font-size: 0.875rem; color: var(--text-2); margin-top: 1.25rem;">
+        Não tem uma conta?
+        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" style="color: var(--text-1); font-weight: 600; text-decoration: none;">
+            Criar conta
+        </a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

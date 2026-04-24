@@ -1,0 +1,60 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Criar conta";
+    Layout = "/Views/Shared/_LayoutExterno.cshtml";
+}
+
+<div style="width: 100%; max-width: 400px;">
+    <div class="text-center mb-6" style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">Criar sua conta</h1>
+        <p style="font-size: 0.875rem; color: var(--text-2); margin: 0;">Comece a controlar suas finanças hoje</p>
+    </div>
+
+    <div class="pf-card">
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 0.875rem;" role="alert"></div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label class="pf-label" asp-for="Input.Nome">Nome completo</label>
+                    <input asp-for="Input.Nome" class="pf-input" placeholder="Seu nome" />
+                    <span asp-validation-for="Input.Nome" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div>
+                    <label class="pf-label" asp-for="Input.Email">E-mail</label>
+                    <input asp-for="Input.Email" class="pf-input" autocomplete="username" placeholder="seu@email.com" />
+                    <span asp-validation-for="Input.Email" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div>
+                    <label class="pf-label" asp-for="Input.Password">Senha</label>
+                    <input asp-for="Input.Password" class="pf-input" autocomplete="new-password" placeholder="••••••••" />
+                    <span asp-validation-for="Input.Password" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <div>
+                    <label class="pf-label" asp-for="Input.ConfirmPassword">Confirmar senha</label>
+                    <input asp-for="Input.ConfirmPassword" class="pf-input" autocomplete="new-password" placeholder="••••••••" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger" style="font-size: 0.8125rem;"></span>
+                </div>
+
+                <button type="submit" class="btn-pf btn-pf-primary w-100" style="justify-content: center; padding: 0.625rem;">
+                    Criar conta
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <p style="text-align: center; font-size: 0.875rem; color: var(--text-2); margin-top: 1.25rem;">
+        Já tem uma conta?
+        <a asp-page="./Login" style="color: var(--text-1); font-weight: 600; text-decoration: none;">
+            Entrar
+        </a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
