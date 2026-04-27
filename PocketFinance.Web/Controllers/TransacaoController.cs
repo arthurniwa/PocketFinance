@@ -15,21 +15,27 @@ namespace PocketFinance.Web.Controllers
             _db = db;
         }
 
-        public IActionResult Index()
+ public IActionResult Index(int? contaId)
         {
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var transacoes = _db.Transacoes
+            var todasTransacoes = _db.Transacoes
                 .Where(t => t.UsuarioId == meuId)
                 .OrderByDescending(t => t.Data)
                 .ToList();
 
+            var transacoes = contaId.HasValue
+                ? contaId.Value == -1
+                ? todasTransacoes.Where(t => t.ContaId == null).ToList()
+                : todasTransacoes.Where(t => t.ContaId == contaId.Value).ToList()
+                : todasTransacoes;
+
             var entradas = transacoes.Where(t => t.Tipo == TipoTransacao.Receita).Sum(t => t.Valor);
-            var saidas = transacoes.Where(t => t.Tipo == TipoTransacao.Despesa).Sum(t => t.Valor);
+            var saidas   = transacoes.Where(t => t.Tipo == TipoTransacao.Despesa).Sum(t => t.Valor);
 
             ViewBag.Entradas = entradas;
-            ViewBag.Saidas = saidas;
-            ViewBag.Saldo = entradas + saidas;
+            ViewBag.Saidas   = saidas;
+            ViewBag.Saldo    = entradas + saidas;
 
             var gastosPorCategoria = transacoes
                 .Where(t => t.Tipo == TipoTransacao.Despesa)
@@ -37,8 +43,11 @@ namespace PocketFinance.Web.Controllers
                 .Select(g => new { Categoria = g.Key, Valor = Math.Abs(g.Sum(t => t.Valor)) })
                 .ToList();
 
-            ViewBag.GraficoLabels = gastosPorCategoria.Select(x => x.Categoria).ToArray();
+            ViewBag.GraficoLabels  = gastosPorCategoria.Select(x => x.Categoria).ToArray();
             ViewBag.GraficoValores = gastosPorCategoria.Select(x => x.Valor).ToArray();
+
+            ViewBag.Contas    = _db.Contas.Where(c => c.UsuarioId == meuId).ToList();
+            ViewBag.ContaId   = contaId;
 
             return View(transacoes);
         }
@@ -76,8 +85,18 @@ namespace PocketFinance.Web.Controllers
                 existente.Data = transacao.Data;
                 existente.Tipo = transacao.Tipo;
                 _db.SaveChanges();
+                if (existente.ContaId.HasValue)
+                {
+                    var conta = _db.Contas.FirstOrDefault(c => c.Id == existente.ContaId.Value);
+                    if (conta != null)
+                    {
+                        conta.Saldo = _db.Transacoes.Where(t => t.ContaId == conta.Id).Sum(t => t.Valor);
+                        _db.SaveChanges();
+                    }
+                }
                 return RedirectToAction("Index");
             }
+
             return View(transacao);
         }
 
@@ -103,6 +122,18 @@ namespace PocketFinance.Web.Controllers
             {
                 _db.Transacoes.Add(transacao);
                 _db.SaveChanges();
+
+                if (transacao.ContaId.HasValue)
+                {
+                    var conta = _db.Contas.FirstOrDefault(c => c.Id == transacao.ContaId.Value);
+
+                    if(conta != null)
+                    {
+                        conta.Saldo = _db.Transacoes.Where(t => t.ContaId == conta.Id).Sum(t => t.Valor);
+                        _db.SaveChanges();
+                    }
+                }
+
                 return RedirectToAction("Index");
             }
             return View(transacao);
@@ -116,8 +147,19 @@ namespace PocketFinance.Web.Controllers
             var t = _db.Transacoes.FirstOrDefault(x => x.Id == id && x.UsuarioId == meuId);
             if (t != null)
             {
+                var contaId = t.ContaId;
                 _db.Transacoes.Remove(t);
                 _db.SaveChanges();
+
+                if (contaId.HasValue)
+                {
+                    var conta = _db.Contas.FirstOrDefault(c => c.Id == contaId.Value);
+                    if (conta != null)
+                    {
+                        conta.Saldo = _db.Transacoes.Where(t2 => t2.ContaId == conta.Id).Sum(t2 => t2.Valor);
+                        _db.SaveChanges();
+                    }
+                }
             }
             return RedirectToAction("Index");
         }

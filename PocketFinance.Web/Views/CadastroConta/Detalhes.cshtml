@@ -1,0 +1,143 @@
+@model (PocketFinance.Core.Conta Conta, List<PocketFinance.Core.Transacao> Transacoes)
+
+@{
+    ViewData["Title"] = Model.Conta.Nome;
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="page-title">@Model.Conta.Nome</h1>
+        <p class="page-subtitle">@Model.Conta.Tipo</p>
+    </div>
+    <a asp-action="Index" class="btn-pf btn-pf-ghost">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="pf-card text-center">
+            <div style="font-size: 0.8125rem; color: var(--text-2); font-weight: 500;">Saldo</div>
+            <div style="font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">R$ @Model.Conta.Saldo.ToString("N2")</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pf-card text-center">
+            <div style="font-size: 0.8125rem; color: #166534; font-weight: 500;">Entradas</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #166534; margin-top: 0.25rem;">R$ @(((decimal)ViewBag.Entradas).ToString("N2"))</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pf-card text-center">
+            <div style="font-size: 0.8125rem; color: #991b1b; font-weight: 500;">Saídas</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #991b1b; margin-top: 0.25rem;">R$ @(((decimal)ViewBag.Saidas).ToString("N2"))</div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="pf-card h-100">
+        <div style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Gastos por categoria</div>
+        <p class="text-muted-sm mb-3">Distribuição do período</p>
+        @if ((ViewBag.GraficoLabels as string[])?.Length > 0)
+        {
+            <div style="position: relative; max-height: 280px;">
+                <canvas id="graficoPizza"></canvas>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state" style="padding: 2rem 1rem;">
+                <i class="bi bi-pie-chart" style="font-size: 1.75rem;"></i>
+                <p style="font-size: 0.8125rem;">Sem despesas para exibir</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="pf-card">
+    <div style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">Lançamentos vinculados</div>
+    @if (!Model.Transacoes.Any())
+    {
+        <p class="text-muted">Nenhum lançamento vinculado a esta conta.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Transacoes)
+                {
+                    <tr>
+                        <td>@t.Data.ToString("dd/MM/yyyy")</td>
+                        <td>@t.Descricao</td>
+                        <td>@t.Categoria</td>
+                        <td style="color: @(t.Tipo == PocketFinance.Core.TipoTransacao.Receita ? "#166534" : "#991b1b"); font-weight: 600;">
+                            @(t.Tipo == PocketFinance.Core.TipoTransacao.Receita ? "+" : "-") R$ @Math.Abs(t.Valor).ToString("N2")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const pizzaLabels  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.GraficoLabels  as string[]));
+    const pizzaValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.GraficoValores as decimal[]));
+    const linhaLabels  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.EvolucaoLabels  as string[]));
+    const linhaValores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.EvolucaoValores as decimal[]));
+
+    (function () {
+    var canvas = document.getElementById('graficoPizza');
+    if (!canvas) return;
+
+    var cores = ['#1e293b','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+
+    new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: 
+		{
+            labels: pizzaLabels,
+            datasets: 
+			[{
+                data: pizzaValores,
+                backgroundColor: cores,
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: 
+		{
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 11, family: 'Inter' }, usePointStyle: true, padding: 12 }
+                }
+            }
+        }
+    });
+})();
+
+    new Chart(document.getElementById('graficoLinha'), {
+        type: 'line',
+        data: {
+            labels: linhaLabels,
+            datasets: [{ label: 'Saldo', data: linhaValores, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3 }]
+        },
+        options: { scales: { y: { beginAtZero: false } } }
+    });
+</script>
+}

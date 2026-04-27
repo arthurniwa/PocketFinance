@@ -20,6 +20,23 @@
     </a>
 </div>
 
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <a asp-action="Index" class="btn-pf @(ViewBag.ContaId == null ? "btn-pf-primary" : "btn-pf-ghost")">
+        Todas
+    </a>
+    <a asp-action="Index" asp-route-contaId="-1"
+        class="btn-pf @(ViewBag.ContaId == -1 ? "btn-pf-primary" : "btn-pf-ghost")">
+        <i class="bi bi-question-circle"></i> Sem conta
+    </a>
+    @foreach (var conta in ViewBag.Contas as List<PocketFinance.Core.Conta>)
+    {
+        <a asp-action="Index" asp-route-contaId="@conta.Id"
+           class="btn-pf @(ViewBag.ContaId == conta.Id ? "btn-pf-primary" : "btn-pf-ghost")">
+            <i class="bi bi-bank"></i> @conta.Nome
+        </a>
+    }
+</div>
+
 <!-- Metric cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">
