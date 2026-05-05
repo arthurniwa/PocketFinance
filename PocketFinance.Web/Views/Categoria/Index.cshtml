@@ -1,0 +1,59 @@
+@model IEnumerable<PocketFinance.Core.Categoria>
+@{ ViewData["Title"] = "Categorias"; }
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Categorias</h1>
+        <p class="page-subtitle">Gerencie suas categorias de lançamento</p>
+    </div>
+    <a asp-controller="Transacao" asp-action="Index" class="btn-pf btn-pf-ghost">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+        <div class="pf-card mb-3">
+            <form asp-action="Criar" method="post" class="d-flex gap-2">
+                @Html.AntiForgeryToken()
+                <input name="nome" class="pf-input" placeholder="Nome da categoria..." required style="flex:1;" />
+                <button type="submit" class="btn-pf btn-pf-primary">
+                    <i class="bi bi-plus"></i> Adicionar
+                </button>
+            </form>
+        </div>
+
+        <div class="pf-card p-0">
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-tag"></i>
+                    <p>Nenhuma categoria cadastrada ainda.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var cat in Model)
+                {
+                    <div class="pf-list-item">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-circle icon-down">
+                                <i class="bi bi-tag"></i>
+                            </div>
+                            <span style="font-size: 0.875rem; font-weight: 500;">@cat.Nome</span>
+                        </div>
+                        <form asp-action="Deletar" asp-route-id="@cat.Id" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-pf btn-pf-danger btn-pf-sm"
+                                    onclick="return confirm('Excluir categoria @cat.Nome?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

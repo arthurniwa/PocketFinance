@@ -14,5 +14,7 @@ namespace PocketFinance.Core
         public DbSet<Meta> Metas { get ; set ; }
 
         public DbSet<Conta> Contas { get ; set ; } = null!;
+
+        public DbSet<Categoria> Categorias { get ; set ; } = null!;
     }
 }

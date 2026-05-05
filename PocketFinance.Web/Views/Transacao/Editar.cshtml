@@ -43,20 +43,16 @@
                     <div class="col-7">
                         <label class="pf-label" asp-for="Categoria">Categoria</label>
                         <select asp-for="Categoria" class="pf-input pf-select">
-                            <optgroup label="Despesas">
-                                <option value="Alimentacao">Alimentação</option>
-                                <option value="Transporte">Transporte</option>
-                                <option value="Moradia">Moradia</option>
-                                <option value="Lazer">Lazer</option>
-                                <option value="Contas">Contas</option>
-                                <option value="Saude">Saúde</option>
-                                <option value="Educacao">Educação</option>
-                            </optgroup>
-                            <optgroup label="Receitas">
-                                <option value="Salario">Salário</option>
-                                <option value="Extra">Extra</option>
-                            </optgroup>
+                            <option value="">Selecione...</option>
+                            @foreach (var cat in ViewBag.Categorias as List<PocketFinance.Core.Categoria>)
+                            {
+                                <option value="@cat.Nome" selected="@(cat.Nome == Model.Categoria ? "selected" : null)">@cat.Nome</option>
+                            }
                         </select>
+                        <a asp-controller="Categoria" asp-action="Index"
+                           style="font-size: 0.75rem; color: var(--text-3); display: block; margin-top: 4px;">
+                            + Gerenciar categorias
+                        </a>
                     </div>
                     <div class="col-5">
                         <label class="pf-label" asp-for="Data">Data</label>

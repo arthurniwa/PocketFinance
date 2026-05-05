@@ -35,6 +35,23 @@ public class CadastroContaController : Controller
         conta.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         _db.Contas.Add(conta);
         _db.SaveChanges();
+
+        if (conta.Saldo > 0)
+        {
+            var transacaoInicial = new Transacao
+            {
+                Descricao = $"Saldo inicial - {conta.Nome}",
+                Categoria = "Extra",
+                Valor = conta.Saldo,
+                Data = DateTime.Now,
+                Tipo = TipoTransacao.Receita,
+                UsuarioId = conta.UsuarioId,
+                ContaId = conta.Id,
+            };
+
+            _db.Transacoes.Add(transacaoInicial);
+            _db.SaveChanges();
+        }
         return RedirectToAction("Index");
     }
 

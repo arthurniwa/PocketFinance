@@ -15,12 +15,20 @@ namespace PocketFinance.Web.Controllers
             _db = db;
         }
 
- public IActionResult Index(int? contaId)
+ public IActionResult Index(int? contaId, int? mes, int? ano)
         {
             var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            var mesFiltro = mes ?? DateTime.Now.Month;
+            var anoFiltro = ano ?? DateTime.Now.Year;
+
             var todasTransacoes = _db.Transacoes
-                .Where(t => t.UsuarioId == meuId)
+                .Where
+                (
+                    t => t.UsuarioId == meuId
+                    && t.Data.Month  == mesFiltro
+                    && t.Data.Year   == anoFiltro
+                )
                 .OrderByDescending(t => t.Data)
                 .ToList();
 
@@ -35,7 +43,31 @@ namespace PocketFinance.Web.Controllers
 
             ViewBag.Entradas = entradas;
             ViewBag.Saidas   = saidas;
-            ViewBag.Saldo    = entradas + saidas;
+
+            var fimDoMes = new DateTime(anoFiltro, mesFiltro, DateTime.DaysInMonth(anoFiltro, mesFiltro), 23, 59, 59);
+
+            decimal saldoReal;
+            if (contaId.HasValue && contaId.Value != -1)
+            {
+                saldoReal = _db.Transacoes
+                    .Where(t => t.UsuarioId == meuId && t.ContaId == contaId.Value && t.Data <= fimDoMes)
+                    .Sum(t => (decimal?)t.Valor) ?? 0;
+            }
+            else if (contaId.HasValue && contaId.Value == -1)
+            {
+                saldoReal = _db.Transacoes
+                    .Where(t => t.UsuarioId == meuId && t.ContaId == null && t.Data <= fimDoMes)
+                    .Sum(t => (decimal?)t.Valor) ?? 0;
+            }
+            else
+            {
+                saldoReal = _db.Transacoes
+                    .Where(t => t.UsuarioId == meuId && t.Data <= fimDoMes)
+                    .Sum(t => (decimal?)t.Valor) ?? 0;
+            }
+
+            ViewBag.Saldo = saldoReal;
+
 
             var gastosPorCategoria = transacoes
                 .Where(t => t.Tipo == TipoTransacao.Despesa)
@@ -48,17 +80,20 @@ namespace PocketFinance.Web.Controllers
 
             ViewBag.Contas    = _db.Contas.Where(c => c.UsuarioId == meuId).ToList();
             ViewBag.ContaId   = contaId;
+            ViewBag.Mes       = mesFiltro;
+            ViewBag.Ano       = anoFiltro;
 
             return View(transacoes);
         }
 
         public IActionResult Editar(int id)
         {
-            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var t = _db.Transacoes.FirstOrDefault(x => x.Id == id && x.UsuarioId == meuId);
             if (t == null) return NotFound();
 
             ViewBag.Contas = _db.Contas.Where(c => c.UsuarioId == meuId).ToList();
+            CarregarCategorias(meuId);
             t.Valor = Math.Abs(t.Valor);
             return View(t);
         }
@@ -102,8 +137,9 @@ namespace PocketFinance.Web.Controllers
 
         public IActionResult Criar()
         {
-            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             ViewBag.Contas = _db.Contas.Where(c => c.UsuarioId == meuId).ToList();
+            CarregarCategorias(meuId);
             return View(new Transacao { Data = DateTime.Now });
         }
 
@@ -164,6 +200,17 @@ namespace PocketFinance.Web.Controllers
             return RedirectToAction("Index");
         }
 
+        private void CarregarCategorias(string meuId)
+        {
+            if (!_db.Categorias.Any(c => c.UsuarioId == meuId))
+            {
+                var padroes = new[] { "Alimentação", "Transporte", "Moradia", "Lazer", "Contas", "Saúde", "Educação", "Salário", "Extra" };
+                foreach (var nome in padroes)
+                    _db.Categorias.Add(new Categoria { Nome = nome, UsuarioId = meuId });
+                _db.SaveChanges();
+            }
+            ViewBag.Categorias = _db.Categorias.Where(c => c.UsuarioId == meuId).OrderBy(c => c.Nome).ToList();
+        }
         private static decimal ParseValorMonetario(string texto)
         {
             if (string.IsNullOrEmpty(texto)) return 0;
