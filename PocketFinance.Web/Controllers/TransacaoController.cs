@@ -44,6 +44,29 @@ namespace PocketFinance.Web.Controllers
             ViewBag.Entradas = entradas;
             ViewBag.Saidas   = saidas;
 
+            var mesAntData = new DateTime(anoFiltro, mesFiltro, 1).AddMonths(-1);
+
+            var transacoesAnt = _db.Transacoes
+                .Where(t => t.UsuarioId == meuId
+                         && t.Data.Month == mesAntData.Month
+                         && t.Data.Year  == mesAntData.Year)
+                .ToList();
+
+            var transacoesAntFiltradas = contaId.HasValue
+                ? contaId.Value == -1
+                    ? transacoesAnt.Where(t => t.ContaId == null).ToList()
+                    : transacoesAnt.Where(t => t.ContaId == contaId.Value).ToList()
+                : transacoesAnt;
+
+            ViewBag.EntradasAnt = transacoesAntFiltradas
+            .Where(t => t.Tipo == TipoTransacao.Receita)
+            .Sum(t => t.Valor);
+
+            ViewBag.SaidasAnt = transacoesAntFiltradas
+            .Where(t => t.Tipo == TipoTransacao.Despesa)
+            .Sum(t => t.Valor);
+
+
             var fimDoMes = new DateTime(anoFiltro, mesFiltro, DateTime.DaysInMonth(anoFiltro, mesFiltro), 23, 59, 59);
 
             decimal saldoReal;

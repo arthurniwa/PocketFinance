@@ -14,6 +14,29 @@
     var mesAnterior = dataMes.AddMonths(-1);
     var mesSeguinte = dataMes.AddMonths(1);
     var nomeMes = dataMes.ToString("MMMM yyyy", cultura);
+    var entradasAnt = ViewBag.EntradasAnt != null ? (decimal)ViewBag.EntradasAnt : 0m;
+    var saidasAnt = ViewBag.SaidasAnt != null ? (decimal)ViewBag.SaidasAnt : 0m;
+
+    string ComparativoTexto(decimal atual, decimal anterior)
+    {
+        if(anterior == 0) return "Sem dados anteriores";
+
+        var diff = ((atual - anterior) / Math.Abs(anterior)) * 100;
+        var seta = diff >= 0 ? "↑" : "↓";
+
+        return $"{seta} {Math.Abs(diff):0} % vs mês anterior";
+    }
+
+    string ComparativoCor(decimal atual, decimal anterior, bool inverter = false)
+    {
+        if(anterior == 0) return "var(--text-3)";
+        
+        var subiu = atual >= anterior;
+        
+        if(inverter) subiu = !subiu;
+
+        return subiu ? "#166534" : "#991b1b";
+    }
 }
 
 <div class="page-header">
@@ -100,7 +123,9 @@
                 <span class="pf-badge pf-badge-up"><i class="bi bi-arrow-up"></i></span>
             </div>
             <span class="pf-card-value" style="color: #166534;">@entradas.ToString("C", cultura)</span>
-            <p class="text-muted-sm mt-2 mb-0">Total de entradas</p>
+            <p class="mt-2 mb-0" style="font-size: 0.75rem; color: @ComparativoCor(entradas, entradasAnt);">
+                @ComparativoTexto(entradas, entradasAnt)
+            </p>
         </div>
     </div>
     <div class="col-md-4">
@@ -110,8 +135,9 @@
                 <span class="pf-badge pf-badge-down"><i class="bi bi-arrow-down"></i></span>
             </div>
             <span class="pf-card-value" style="color: #991b1b;">@Math.Abs(saidas).ToString("C", cultura)</span>
-            <p class="text-muted-sm mt-2 mb-0">Total de saídas</p>
-        </div>
+           <p class="mt-2 mb-0" style="font-size: 0.75rem; color: @ComparativoCor(Math.Abs(saidas), Math.Abs(saidasAnt), inverter: true);">
+                @ComparativoTexto(Math.Abs(saidas), Math.Abs(saidasAnt))
+            </p>
     </div>
 </div>
 
