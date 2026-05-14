@@ -42,7 +42,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">Finanças</h1>
-        <p class="page-subtitle">Controle de receitas e despesas</p>
+        <p class="page-subtitle">Movimentações de @nomeMes</p>
     </div>
     <a asp-action="Criar" class="btn-pf btn-pf-primary">
         <i class="bi bi-plus"></i> Novo lançamento
@@ -102,6 +102,34 @@
     }
 </div>
 
+<!-- Filtros -->
+<div class="pf-card mb-4" style="padding: 0.875rem 1rem;">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div style="position: relative;">
+                <i class="bi bi-search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 0.875rem;"></i>
+                <input id="filtro-busca" type="text" class="pf-input" placeholder="Buscar por descrição..."
+                       style="padding-left: 2.25rem;" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select id="filtro-categoria" class="pf-input pf-select">
+                <option value="">Todas as categorias</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <div class="d-flex gap-1">
+                <button class="btn-pf btn-pf-primary btn-pf-sm w-100 filtro-tipo" data-tipo="todos"
+                        style="justify-content: center;">Todos</button>
+                <button class="btn-pf btn-pf-ghost btn-pf-sm w-100 filtro-tipo" data-tipo="receita"
+                        style="justify-content: center;">Receitas</button>
+                <button class="btn-pf btn-pf-ghost btn-pf-sm w-100 filtro-tipo" data-tipo="despesa"
+                        style="justify-content: center;">Despesas</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Metric cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">
@@ -119,7 +147,7 @@
     <div class="col-md-4">
         <div class="pf-card h-100">
             <div class="d-flex justify-content-between align-items-start">
-                <span class="pf-card-label">Receitas</span>
+                <span class="pf-card-label">Receitas do mês</span>
                 <span class="pf-badge pf-badge-up"><i class="bi bi-arrow-up"></i></span>
             </div>
             <span class="pf-card-value" style="color: #166534;">@entradas.ToString("C", cultura)</span>
@@ -131,7 +159,7 @@
     <div class="col-md-4">
         <div class="pf-card h-100">
             <div class="d-flex justify-content-between align-items-start">
-                <span class="pf-card-label">Despesas</span>
+                <span class="pf-card-label">Despesas do mês</span>
                 <span class="pf-badge pf-badge-down"><i class="bi bi-arrow-down"></i></span>
             </div>
             <span class="pf-card-value" style="color: #991b1b;">@Math.Abs(saidas).ToString("C", cultura)</span>
@@ -162,7 +190,10 @@
                 @foreach (var item in Model)
                 {
                     var isReceita = item.Tipo == PocketFinance.Core.TipoTransacao.Receita;
-                    <div class="pf-list-item">
+                    <div class="pf-list-item"
+                         data-descricao="@item.Descricao.ToLower()"
+                         data-categoria="@item.Categoria"
+                         data-tipo="@(isReceita ? "receita" : "despesa")">
                         <div class="d-flex align-items-center gap-3">
                             <div class="icon-circle @(isReceita ? "icon-up" : "icon-down")">
                                 <i class="bi @(isReceita ? "bi-arrow-up" : "bi-arrow-down")"></i>
@@ -216,6 +247,57 @@
 </div>
 
 @section Scripts {
+<script>
+(function () {
+    const busca     = document.getElementById('filtro-busca');
+    const catSelect = document.getElementById('filtro-categoria');
+    const items     = document.querySelectorAll('.pf-list-item[data-descricao]');
+
+    const cats = [...new Set([...items].map(i => i.dataset.categoria).filter(Boolean))].sort();
+    cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        catSelect.appendChild(opt);
+    });
+
+    let tipoAtivo = 'todos';
+
+    function filtrar() {
+        const texto = busca.value.toLowerCase().trim();
+        const cat   = catSelect.value;
+        let visiveis = 0;
+
+        items.forEach(item => {
+            const matchTexto = !texto || item.dataset.descricao.includes(texto);
+            const matchCat   = !cat   || item.dataset.categoria === cat;
+            const matchTipo  = tipoAtivo === 'todos' || item.dataset.tipo === tipoAtivo;
+            const visivel    = matchTexto && matchCat && matchTipo;
+            item.style.display = visivel ? '' : 'none';
+            if (visivel) visiveis++;
+        });
+
+        const contador = document.querySelector('.pf-card .text-muted-sm');
+        if (contador) contador.textContent = visiveis + ' registros';
+    }
+
+    busca.addEventListener('input', filtrar);
+    catSelect.addEventListener('change', filtrar);
+
+    document.querySelectorAll('.filtro-tipo').forEach(btn => {
+        btn.addEventListener('click', () => {
+            tipoAtivo = btn.dataset.tipo;
+            document.querySelectorAll('.filtro-tipo').forEach(b => {
+                b.classList.remove('btn-pf-primary');
+                b.classList.add('btn-pf-ghost');
+            });
+            btn.classList.remove('btn-pf-ghost');
+            btn.classList.add('btn-pf-primary');
+            filtrar();
+        });
+    });
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     (function () {

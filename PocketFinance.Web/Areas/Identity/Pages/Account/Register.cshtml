@@ -6,8 +6,8 @@
 }
 
 <div style="width: 100%; max-width: 400px;">
-    <div class="text-center mb-6" style="margin-bottom: 2rem;">
-        <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">Criar sua conta</h1>
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.625rem; font-weight: 700; margin-bottom: 0.375rem;">Criar sua conta</h1>
         <p style="font-size: 0.875rem; color: var(--text-2); margin: 0;">Comece a controlar suas finanças hoje</p>
     </div>
 
@@ -30,13 +30,25 @@
 
                 <div>
                     <label class="pf-label" asp-for="Input.Password">Senha</label>
-                    <input asp-for="Input.Password" class="pf-input" autocomplete="new-password" placeholder="••••••••" />
+                    <div style="position: relative;">
+                        <input asp-for="Input.Password" id="senha-reg" class="pf-input" autocomplete="new-password" placeholder="••••••••" style="padding-right: 2.75rem;" />
+                        <button type="button" onclick="toggleSenha('senha-reg', this)"
+                                style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-3); cursor: pointer; padding: 0;">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                     <span asp-validation-for="Input.Password" class="text-danger" style="font-size: 0.8125rem;"></span>
                 </div>
 
                 <div>
                     <label class="pf-label" asp-for="Input.ConfirmPassword">Confirmar senha</label>
-                    <input asp-for="Input.ConfirmPassword" class="pf-input" autocomplete="new-password" placeholder="••••••••" />
+                    <div style="position: relative;">
+                        <input asp-for="Input.ConfirmPassword" id="senha-confirm" class="pf-input" autocomplete="new-password" placeholder="••••••••" style="padding-right: 2.75rem;" />
+                        <button type="button" onclick="toggleSenha('senha-confirm', this)"
+                                style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-3); cursor: pointer; padding: 0;">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger" style="font-size: 0.8125rem;"></span>
                 </div>
 
@@ -57,4 +69,17 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleSenha(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+    </script>
 }

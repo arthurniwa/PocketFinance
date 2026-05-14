@@ -12,64 +12,59 @@
     var cultura = new System.Globalization.CultureInfo("pt-BR");
     var nomeCompleto = User.Claims.FirstOrDefault(c => c.Type == "NomeCompleto")?.Value ?? User.Identity?.Name ?? "";
     var primeiroNome = nomeCompleto.Split(' ').FirstOrDefault() ?? "Olá";
-    var saldoTotal   = ViewBag.SaldoTotal   != null ? (decimal)ViewBag.SaldoTotal   : 0m;
-    var entradasMes  = ViewBag.EntradasMes  != null ? (decimal)ViewBag.EntradasMes  : 0m;
-    var saidasMes    = ViewBag.SaidasMes    != null ? (decimal)ViewBag.SaidasMes    : 0m;
-    var lancamentos  = ViewBag.UltimosLancamentos as List<PocketFinance.Core.Transacao> ?? new();
-    var nomeMes      = DateTime.Now.ToString("MMMM", cultura);
+    var saldoTotal  = ViewBag.SaldoTotal  != null ? (decimal)ViewBag.SaldoTotal  : 0m;
+    var entradasMes = ViewBag.EntradasMes != null ? (decimal)ViewBag.EntradasMes : 0m;
+    var saidasMes   = ViewBag.SaidasMes   != null ? (decimal)ViewBag.SaidasMes   : 0m;
+    var lancamentos = ViewBag.UltimosLancamentos as List<PocketFinance.Core.Transacao> ?? new();
+    var metas       = ViewBag.Metas as List<PocketFinance.Core.Meta> ?? new();
+    var nomeMes     = DateTime.Now.ToString("MMMM", cultura);
 
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Olá, @primeiroNome 👋</h1>
-            <p class="page-subtitle">Resumo de @nomeMes</p>
-        </div>
-    </div>
-
-    <!-- Cards de resumo -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="pf-card h-100">
-                <div class="d-flex justify-content-between align-items-start">
-                    <span class="pf-card-label">Saldo total</span>
-                    <span class="pf-badge @(saldoTotal >= 0 ? "pf-badge-neutral" : "pf-badge-down")">
-                        <i class="bi bi-wallet2"></i>
+    <!-- Hero: Patrimônio -->
+    <div class="pf-card mb-4" style="background: var(--primary); border-color: var(--primary); padding: 2rem;">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <p style="font-size: 0.8125rem; font-weight: 500; color: rgba(255,255,255,0.65); margin-bottom: 0.5rem;">
+                    Olá, @primeiroNome 👋 — seu patrimônio total
+                </p>
+                <div style="font-size: 2.25rem; font-weight: 700; color: #fff; letter-spacing: -0.02em;">
+                    @saldoTotal.ToString("C", cultura)
+                </div>
+                <div style="margin-top: 0.75rem; display: flex; gap: 1.25rem; flex-wrap: wrap;">
+                    <span style="font-size: 0.8125rem; color: rgba(255,255,255,0.75);">
+                        <i class="bi bi-arrow-up-circle me-1"></i>
+                        @entradasMes.ToString("C", cultura) em receitas em @nomeMes
+                    </span>
+                    <span style="font-size: 0.8125rem; color: rgba(255,255,255,0.75);">
+                        <i class="bi bi-arrow-down-circle me-1"></i>
+                        @Math.Abs(saidasMes).ToString("C", cultura) em despesas em @nomeMes
                     </span>
                 </div>
-                <span class="pf-card-value @(saldoTotal >= 0 ? "" : "text-danger")">
-                    @saldoTotal.ToString("C", cultura)
-                </span>
-                <p class="text-muted-sm mt-2 mb-0">Todas as contas</p>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="pf-card h-100">
-                <div class="d-flex justify-content-between align-items-start">
-                    <span class="pf-card-label">Receitas</span>
-                    <span class="pf-badge pf-badge-up"><i class="bi bi-arrow-up"></i></span>
-                </div>
-                <span class="pf-card-value" style="color: #166534;">@entradasMes.ToString("C", cultura)</span>
-                <p class="text-muted-sm mt-2 mb-0">Este mês</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="pf-card h-100">
-                <div class="d-flex justify-content-between align-items-start">
-                    <span class="pf-card-label">Despesas</span>
-                    <span class="pf-badge pf-badge-down"><i class="bi bi-arrow-down"></i></span>
-                </div>
-                <span class="pf-card-value" style="color: #991b1b;">@Math.Abs(saidasMes).ToString("C", cultura)</span>
-                <p class="text-muted-sm mt-2 mb-0">Este mês</p>
+            <div class="d-flex gap-2">
+                <a asp-controller="Transacao" asp-action="Criar"
+                   class="btn-pf"
+                   style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3); gap: 0.4rem;">
+                    <i class="bi bi-plus"></i> Novo lançamento
+                </a>
+                <a asp-controller="Transacao" asp-action="Index"
+                   class="btn-pf"
+                   style="background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.2); gap: 0.4rem;">
+                    <i class="bi bi-bar-chart-line"></i> Ver Finanças
+                </a>
             </div>
         </div>
     </div>
 
     <div class="row g-3">
         <!-- Últimos lançamentos -->
-        <div class="col-lg-8">
-            <div class="pf-card p-0">
+        <div class="col-lg-7">
+            <div class="pf-card p-0 h-100">
                 <div class="d-flex justify-content-between align-items-center px-4 py-3" style="border-bottom: 1px solid var(--border);">
-                    <span style="font-size: 0.875rem; font-weight: 600;">Últimos lançamentos</span>
-                    <a asp-controller="Transacao" asp-action="Index" class="text-muted-sm" style="color: var(--text-3);">Ver todos</a>
+                    <div>
+                        <span style="font-size: 0.875rem; font-weight: 600;">Últimos lançamentos</span>
+                        <span class="text-muted-sm ms-2">todas as contas</span>
+                    </div>
+                    <a asp-controller="Transacao" asp-action="Index" style="font-size: 0.8125rem; color: var(--text-3);">Ver todos →</a>
                 </div>
                 @if (!lancamentos.Any())
                 {
@@ -104,41 +99,48 @@
             </div>
         </div>
 
-        <!-- Acesso rápido -->
-        <div class="col-lg-4">
-            <div class="pf-card">
-                <div style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">Acesso rápido</div>
-                <div class="d-flex flex-column gap-2">
-                    <a asp-controller="Transacao" asp-action="Criar" class="btn-pf btn-pf-ghost w-100" style="justify-content: flex-start; gap: 0.5rem;">
-                        <i class="bi bi-plus-circle"></i> Novo lançamento
-                    </a>
-                    <a asp-controller="Transacao" asp-action="Index" class="btn-pf btn-pf-ghost w-100" style="justify-content: flex-start; gap: 0.5rem;">
-                        <i class="bi bi-cash-coin"></i> Ver Finanças
-                    </a>
-                    <a asp-controller="Meta" asp-action="Index" class="btn-pf btn-pf-ghost w-100" style="justify-content: flex-start; gap: 0.5rem;">
-                        <i class="bi bi-bullseye"></i> Minhas Metas
-                    </a>
-                    <a asp-controller="CadastroConta" asp-action="Index" class="btn-pf btn-pf-ghost w-100" style="justify-content: flex-start; gap: 0.5rem;">
-                        <i class="bi bi-bank"></i> Contas
-                    </a>
+        <!-- Metas em andamento -->
+        <div class="col-lg-5">
+            <div class="pf-card p-0 h-100">
+                <div class="d-flex justify-content-between align-items-center px-4 py-3" style="border-bottom: 1px solid var(--border);">
+                    <span style="font-size: 0.875rem; font-weight: 600;">Metas em andamento</span>
+                    <a asp-controller="Meta" asp-action="Index" style="font-size: 0.8125rem; color: var(--text-3);">Ver todas →</a>
                 </div>
+                @if (!metas.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-bullseye"></i>
+                        <p>Nenhuma meta ativa.<br>
+                            <a asp-controller="Meta" asp-action="Criar" style="color: var(--text-2);">Criar uma meta</a>
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <div style="padding: 0.75rem 1.25rem; display: flex; flex-direction: column; gap: 1.25rem;">
+                        @foreach (var meta in metas)
+                        {
+                            var pct = meta.PorcentagemConcluida;
+                            var corBarra = pct >= 75 ? "#166534" : pct >= 40 ? "#d97706" : "#2563eb";
+                            <div>
+                                <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                    <span style="font-size: 0.875rem; font-weight: 500;">@meta.Nome</span>
+                                    <span style="font-size: 0.75rem; color: var(--text-3);">@pct%</span>
+                                </div>
+                                <div style="height: 6px; background: var(--border); border-radius: 99px; overflow: hidden;">
+                                    <div style="height: 100%; width: @pct%; background: @corBarra; border-radius: 99px; transition: width 0.4s;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span style="font-size: 0.75rem; color: var(--text-3);">@meta.ValorAtual.ToString("C", cultura)</span>
+                                    <span style="font-size: 0.75rem; color: var(--text-3);">@meta.ValorMeta.ToString("C", cultura)</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
-
-    <style>
-        .nav-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: border-color 0.15s, box-shadow 0.15s;
-            cursor: pointer;
-        }
-        .nav-card:hover {
-            border-color: #9ca3af;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-    </style>
 }
 else
 {

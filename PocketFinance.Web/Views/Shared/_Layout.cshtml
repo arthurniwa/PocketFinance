@@ -47,6 +47,9 @@
                 <a asp-controller="Categoria" asp-action="Index" class="sidebar-link @(paginaAtual == "Categoria" ? "active" : "")">
                     <i class="bi bi-tag"></i> Categorias
                 </a>
+                <a asp-controller="IA" asp-action="Index" class="sidebar-link @(paginaAtual == "IA" ? "active" : "")">
+                    <i class="bi bi-robot"></i> Assistente IA
+                </a>
                 <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-link @(paginaAtual == "Manage" ? "active" : "")">
                     <i class="bi bi-person-gear"></i> Conta
                 </a>
@@ -85,6 +88,9 @@
             </a>
             <a asp-controller="Categoria" asp-action="Index" class="sidebar-link @(paginaAtual == "Categoria" ? "active" : "")">
                 <i class="bi bi-tag"></i> Categorias
+            </a>
+            <a asp-controller="IA" asp-action="Index" class="sidebar-link @(paginaAtual == "IA" ? "active" : "")">
+                <i class="bi bi-robot"></i> Assistente IA
             </a>
             <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-link">
                 <i class="bi bi-person-gear"></i> Minha Conta

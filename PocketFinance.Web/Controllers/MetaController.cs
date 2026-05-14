@@ -22,7 +22,11 @@ namespace PocketFinance.Web.Controllers
             var metas = _db.Metas
                 .Where(m => m.UsuarioId == meuId)
                 .OrderBy(m => m.DataAlvo)
-                .ToList();
+                .ToList();	
+
+			ViewBag.TotalGuardado = metas.Sum(m => m.ValorAtual);
+			ViewBag.TotalMeta     = metas.Sum(m => m.ValorMeta);
+			ViewBag.TotalMetas    = metas.Count;
 
             return View(metas);
         }

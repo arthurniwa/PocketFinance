@@ -9,6 +9,7 @@ var connectionString = builder.Configuration.GetConnectionString("AppDbContextCo
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
 
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => 

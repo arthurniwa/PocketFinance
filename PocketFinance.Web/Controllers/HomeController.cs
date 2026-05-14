@@ -44,10 +44,16 @@ public class HomeController : Controller
             .Sum(t => (decimal?)t.Valor) ?? 0;
 
             ViewBag.UltimosLancamentos = _db.Transacoes
-            .Where(t => t.UsuarioId == meuId)
-            .OrderByDescending(t => t.Data)
-            .Take(5)
-            .ToList();
+                .Where(t => t.UsuarioId == meuId)
+                .OrderByDescending(t => t.Data)
+                .Take(5)
+                .ToList();
+
+            ViewBag.Metas = _db.Metas
+                .Where(m => m.UsuarioId == meuId && m.ValorAtual < m.ValorMeta)
+                .OrderBy(m => m.DataAlvo)
+                .Take(3)
+                .ToList();
         }
         
         return View();

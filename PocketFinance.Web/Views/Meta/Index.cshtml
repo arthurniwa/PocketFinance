@@ -1,7 +1,12 @@
 @model IEnumerable<PocketFinance.Core.Meta>
 @{
     ViewData["Title"] = "Metas";
-    var cultura = new System.Globalization.CultureInfo("pt-BR");
+    var cultura       = new System.Globalization.CultureInfo("pt-BR");
+    var totalGuardado = ViewBag.TotalGuardado != null ? (decimal)ViewBag.TotalGuardado : 0m;
+    var totalMeta     = ViewBag.TotalMeta     != null ? (decimal)ViewBag.TotalMeta     : 0m;
+    var totalMetas    = ViewBag.TotalMetas    != null ? (int)ViewBag.TotalMetas        : 0;
+    var metasAtivas     = Model.Where(m => m.PorcentagemConcluida < 100).ToList();
+    var metasConcluidas = Model.Where(m => m.PorcentagemConcluida >= 100).ToList();
 }
 
 <div class="page-header">
@@ -25,92 +30,172 @@
 }
 else
 {
-    <div class="row g-3">
-        @foreach (var item in Model)
-        {
-            var progresso = item.ValorMeta > 0 ? Math.Min((item.ValorAtual / item.ValorMeta) * 100, 100) : 0;
-            var diasRestantes = (item.DataAlvo - DateTime.Now).Days;
-            var corBarra = progresso >= 100 ? "#10b981" : progresso < 30 ? "#ef4444" : progresso < 70 ? "#f59e0b" : "#3b82f6";
+    <!-- Resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="pf-card h-100">
+                <span class="pf-card-label">Total de metas</span>
+                <span class="pf-card-value">@totalMetas</span>
+                <p class="text-muted-sm mt-2 mb-0">objetivos cadastrados</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pf-card h-100">
+                <span class="pf-card-label">Total guardado</span>
+                <span class="pf-card-value" style="color: #166534;">@totalGuardado.ToString("C", cultura)</span>
+                <p class="text-muted-sm mt-2 mb-0">em todas as metas</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pf-card h-100">
+                <span class="pf-card-label">Total a alcançar</span>
+                <span class="pf-card-value">@totalMeta.ToString("C", cultura)</span>
+                <p class="text-muted-sm mt-2 mb-0">soma dos objetivos</p>
+            </div>
+        </div>
+    </div>
 
-            <div class="col-md-6 col-lg-4">
-                <div class="goal-card">
+    <!-- Metas em andamento -->
+    @if (metasAtivas.Any())
+    {
+        <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            Em andamento
+        </h2>
+        <div class="row g-3 mb-4">
+            @foreach (var item in metasAtivas)
+            {
+                var progresso = item.ValorMeta > 0 ? Math.Min((item.ValorAtual / item.ValorMeta) * 100, 100) : 0;
+                var diasRestantes = (item.DataAlvo - DateTime.Now).Days;
+                var corBarra = progresso >= 70 ? "#3b82f6" : progresso >= 30 ? "#f59e0b" : "#ef4444";
+                var falta = item.ValorMeta - item.ValorAtual;
+                var porMes = diasRestantes > 0 ? falta / Math.Max(diasRestantes / 30m, 1) : 0;
 
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <div style="font-size: 0.9375rem; font-weight: 600;">@item.Nome</div>
-                            <div class="text-muted-sm mt-0.5">
-                                <i class="bi bi-calendar3"></i> @item.DataAlvo.ToString("dd/MM/yyyy")
+                <div class="col-md-6 col-lg-4">
+                    <div class="goal-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <div style="font-size: 0.9375rem; font-weight: 600;">@item.Nome</div>
+                                <div class="text-muted-sm mt-1">
+                                    <i class="bi bi-calendar3"></i> @item.DataAlvo.ToString("dd/MM/yyyy")
+                                    · <span class="@(diasRestantes < 0 ? "text-danger" : "")">
+                                        @(diasRestantes < 0 ? "atrasado" : $"{diasRestantes}d restantes")
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="icon-circle icon-blue">
+                                <i class="bi bi-trophy"></i>
                             </div>
                         </div>
-                        <div class="icon-circle icon-blue">
-                            <i class="bi bi-trophy"></i>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <span style="font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em;">
+                                    @item.ValorAtual.ToString("C", cultura)
+                                </span>
+                                <span class="text-muted-sm">de @item.ValorMeta.ToString("C", cultura)</span>
+                            </div>
+                            <div class="pf-progress">
+                                <div class="pf-progress-bar" style="width: @progresso.ToString("0", System.Globalization.CultureInfo.InvariantCulture)%; background: @corBarra;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span style="font-size: 0.75rem; color: @corBarra; font-weight: 500;">@progresso.ToString("0")% concluído</span>
+                                <span style="font-size: 0.75rem; color: var(--text-3);">falta @falta.ToString("C", cultura)</span>
+                            </div>
+                        </div>
+
+                        @if (porMes > 0)
+                        {
+                            <div style="background: var(--bg-2, #f8fafc); border-radius: 8px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.8125rem; color: var(--text-2);">
+                                <i class="bi bi-lightbulb" style="color: #f59e0b;"></i>
+                                Guarde ~@porMes.ToString("C", cultura)/mês para atingir no prazo
+                            </div>
+                        }
+
+                        <div class="d-flex flex-column gap-2">
+                            <button type="button" class="btn-pf btn-pf-ghost w-100" style="justify-content: center;"
+                                    data-bs-toggle="modal" data-bs-target="#depositar-@item.Id">
+                                <i class="bi bi-piggy-bank"></i> Guardar dinheiro
+                            </button>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Editar" asp-route-id="@item.Id" class="btn-pf btn-pf-ghost flex-fill" style="justify-content: center;">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <form asp-action="Deletar" asp-route-id="@item.Id" method="post" class="flex-fill">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-pf btn-pf-danger w-100" style="justify-content: center;"
+                                            onclick="return confirm('Excluir esta meta?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-baseline mb-1">
-                            <span style="font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em;">
-                                @item.ValorAtual.ToString("C", cultura)
-                            </span>
-                            <span class="text-muted-sm">de @item.ValorMeta.ToString("C", cultura)</span>
-                        </div>
-                        <div class="pf-progress">
-                            <div class="pf-progress-bar" style="width: @progresso.ToString("0", System.Globalization.CultureInfo.InvariantCulture)%; background: @corBarra;"></div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-1">
-                            <span class="text-muted-sm" style="color: @corBarra !important; font-weight: 500;">@progresso.ToString("0")% concluído</span>
-                            <span class="text-muted-sm @(diasRestantes < 0 ? "text-danger" : "")">
-                                @(diasRestantes < 0 ? "Atrasado" : $"{diasRestantes}d restantes")
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="mt-auto d-flex flex-column gap-2">
-                        <button type="button" class="btn-pf btn-pf-ghost w-100" style="justify-content: center;"
-                                data-bs-toggle="modal" data-bs-target="#depositar-@item.Id">
-                            <i class="bi bi-piggy-bank"></i> Guardar dinheiro
-                        </button>
-                        <div class="d-flex gap-2">
-                            <a asp-action="Editar" asp-route-id="@item.Id" class="btn-pf btn-pf-ghost flex-fill" style="justify-content: center;">
-                                <i class="bi bi-pencil"></i> Editar
-                            </a>
-                            <form asp-action="Deletar" asp-route-id="@item.Id" method="post" class="flex-fill">
-                                <button type="submit" class="btn-pf btn-pf-danger w-100" style="justify-content: center;"
-                                        onclick="return confirm('Excluir esta meta?')">
-                                    <i class="bi bi-trash"></i> Excluir
-                                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="depositar-@item.Id" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 rounded-3 shadow-lg">
+                            <div class="modal-header border-bottom" style="padding: 1.25rem 1.5rem;">
+                                <div>
+                                    <h6 class="modal-title fw-semibold mb-0">Guardar em "@item.Nome"</h6>
+                                    <small class="text-muted">Saldo atual: @item.ValorAtual.ToString("C", cultura)</small>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form asp-action="Depositar" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="modal-body" style="padding: 1.25rem 1.5rem;">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <label class="pf-label">Valor a guardar (R$)</label>
+                                    <input type="number" name="valorExtra" class="pf-input" placeholder="0,00" step="0.01" min="0.01" required />
+                                </div>
+                                <div class="modal-footer border-top" style="padding: 1rem 1.5rem;">
+                                    <button type="button" class="btn-pf btn-pf-ghost" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn-pf btn-pf-primary">Confirmar</button>
+                                </div>
                             </form>
                         </div>
                     </div>
-
                 </div>
-            </div>
+            }
+        </div>
+    }
 
-            <!-- Modal depósito -->
-            <div class="modal fade" id="depositar-@item.Id" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-0 rounded-3 shadow-lg">
-                        <div class="modal-header border-bottom" style="padding: 1.25rem 1.5rem;">
-                            <div>
-                                <h6 class="modal-title fw-semibold mb-0">Guardar em "@item.Nome"</h6>
-                                <small class="text-muted">Saldo atual: @item.ValorAtual.ToString("C", cultura)</small>
+    <!-- Metas concluídas -->
+    @if (metasConcluidas.Any())
+    {
+        <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            ✅ Concluídas
+        </h2>
+        <div class="row g-3">
+            @foreach (var item in metasConcluidas)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="goal-card" style="opacity: 0.75;">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div style="font-size: 0.9375rem; font-weight: 600;">@item.Nome</div>
+                            <div class="icon-circle" style="background: #d1fae5; color: #059669;">
+                                <i class="bi bi-check-lg"></i>
                             </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <form asp-action="Depositar" method="post">
-                            <div class="modal-body" style="padding: 1.25rem 1.5rem;">
-                                <input type="hidden" name="id" value="@item.Id" />
-                                <label class="pf-label">Valor a guardar (R$)</label>
-                                <input type="number" name="valorExtra" class="pf-input" placeholder="0,00" step="0.01" min="0.01" required />
-                            </div>
-                            <div class="modal-footer border-top" style="padding: 1rem 1.5rem;">
-                                <button type="button" class="btn-pf btn-pf-ghost" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn-pf btn-pf-primary">Confirmar</button>
-                            </div>
+                        <div class="pf-progress mb-2">
+                            <div class="pf-progress-bar" style="width: 100%; background: #10b981;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size: 0.875rem; font-weight: 600; color: #059669;">Meta atingida!</span>
+                            <span class="text-muted-sm">@item.ValorMeta.ToString("C", cultura)</span>
+                        </div>
+                        <form asp-action="Deletar" asp-route-id="@item.Id" method="post" class="mt-3">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-pf btn-pf-ghost w-100" style="justify-content: center;"
+                                    onclick="return confirm('Arquivar esta meta?')">
+                                <i class="bi bi-archive"></i> Arquivar
+                            </button>
                         </form>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 }
